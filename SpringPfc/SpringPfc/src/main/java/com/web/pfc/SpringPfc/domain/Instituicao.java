@@ -8,14 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table (name= "instituicao")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+
 
 public class Instituicao{
     @Id
@@ -34,16 +33,48 @@ public class Instituicao{
     @Column(name="nome", length = 120)
     private String nome;
 
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getNome(){
+        return nome;
+    }
+
     @NotEmpty(message = "CNPJ obrigatório ser preenchido")
     @Column(name="cnpj", length=14)
     private String cnpj;
+
+        public void setCnpj(String cnpj){
+            this.cnpj = cnpj;
+        }
+
+        public String getCnpj(){
+            return cnpj;
+        }
 
     @NotEmpty(message = "Endereço obrigatório ser preenchido")
     @Column(name="endereco", length=150)
     private String endereco;
 
+    public void setEndereco(String endereco){
+            this.endereco = endereco;
+        }
+
+        public String getEndereco(){
+            return endereco;
+        }
+
     @Column (name= "Status:")
     private StatusInst status;
+
+    public void setStatus(StatusInst status){
+            this.status = status;
+        }
+
+        public StatusInst getStatus(){
+            return status;
+        }
 }
 
 
