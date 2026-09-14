@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import instituicaoService from "../services/instituicaoService";
+import InstituicaoService from "../Service/InstituicaoService";
 
 export function useInstituicao() {
-  const [instituicaos, setInstituicao] = useState([]);
+  const [instituicao, setInstituicao] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
 
@@ -10,7 +10,7 @@ export function useInstituicao() {
     setCarregando(true);
     setErro(null);
     try {
-      const dados = await instituicaoService.listar(filtro);
+      const dados = await InstituicaoService.listar(filtro);
       setInstituicao(dados);
     } catch (err) {
       setErro("Não foi possível carregar as instituições.");
@@ -26,15 +26,15 @@ export function useInstituicao() {
 
   const salvar = async (instituicao) => {
     if (instituicao.id) {
-      await instituicaoService.atualizar(instituicao.id, instituicao);
+      await InstituicaoService.atualizar(instituicao.id, instituicao);
     } else {
-      await instituicaoService.criar(instituicao);
+      await InstituicaoService.criar(instituicao);
     }
     await carregar();
   };
 
   const excluir = async (id) => {
-    await instituicaoService.excluir(id);
+    await InstituicaoService.excluir(id);
     await carregar();
   };
 

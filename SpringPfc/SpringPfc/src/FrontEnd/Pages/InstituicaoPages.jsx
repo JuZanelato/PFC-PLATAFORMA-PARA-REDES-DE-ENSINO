@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useInstituicao } from "../Hook/useInstituicao";
 import InstituicaoForm from "../Components/InstituicaoForm";
 import InstituicaoTable from "../Components/InstituicaoTable";
-import "./InstituicoesPage.css";
+import "./InstituicaoPages.css";
+import "../RoutesReactDom/App";
 
-export default function InstituicaoPage() {
-  const { instituicoes, carregando, erro, salvar, excluir } = useInstituicao();
+export default function InstituicaoPages() {
+  const { instituicao, carregando, erro, salvar, excluir } = useInstituicao();
   const [selecionada, setSelecionada] = useState(null);
 
   const handleExcluir = async (instituicao) => {
@@ -22,7 +23,7 @@ export default function InstituicaoPage() {
   };
 
   return (
-    <div className="instituicao-page">
+    <div className="instituicao-pages">
       <header>
         <h1>Gestão de Instituições</h1>
       </header>
@@ -38,7 +39,7 @@ export default function InstituicaoPage() {
         <p>Carregando...</p>
       ) : (
         <InstituicaoTable
-          instituicoes={instituicoes}
+          instituicao={instituicao}
           onEditar={setSelecionada}
           onExcluir={handleExcluir}
         />

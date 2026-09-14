@@ -1,5 +1,5 @@
-export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) {
-  if (instituicoes.length === 0) {
+export default function InstituicaoTable({ instituicao, onEditar, onExcluir }) {
+  if (instituicao.length === 0) {
     return <p className="tabela-vazia">Nenhuma instituição cadastrada ainda.</p>;
   }
 
@@ -15,7 +15,7 @@ export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) 
         </tr>
       </thead>
       <tbody>
-        {instituicoes.map((inst) => (
+        {instituicao.map((inst) => (
           <tr key={inst.id}>
             <td>{inst.nome}</td>
             <td>{inst.cnpj}</td>

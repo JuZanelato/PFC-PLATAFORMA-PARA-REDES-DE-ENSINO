@@ -1,7 +1,7 @@
-import InstituicaoPage from "./pages/InstituicaoPage";
+import InstituicaoPages from "../Pages/InstituicaoPages";
 
 function App() {
-  return <InstituicaoPage />;
+  return <InstituicaoPages />;
 }
 
 export default App;

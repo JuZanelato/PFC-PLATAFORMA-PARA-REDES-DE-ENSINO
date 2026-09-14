@@ -30,7 +30,6 @@ public class Instituicao{
         return id;
     }
 
-
     @NotEmpty(message = "Obrigatório nome ser preenchido")
     @Column(name="nome", length = 120)
     private String nome;

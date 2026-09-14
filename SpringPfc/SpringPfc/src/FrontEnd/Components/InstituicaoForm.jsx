@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { STATUS_OPTIONS } from "../services/instituicaoService";
+import { STATUS_OPTIONS } from "../Service/InstituicaoService";
 
-const VAZIO = { nome: "", cnpj: "", endereco: "", status: "ATIVO" };
+const VAZIO = { nome: "", cnpj: "", endereco: "", status: "ATIVA" };
 
 export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCancelar }) {
   const [form, setForm] = useState(VAZIO);

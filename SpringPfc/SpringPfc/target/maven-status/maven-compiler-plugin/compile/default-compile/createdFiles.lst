@@ -1,5 +1,6 @@
 com\web\pfc\SpringPfc\domain\Instituicao.class
+com\web\pfc\SpringPfc\Controller\InstituicaoController.class
 com\web\pfc\SpringPfc\domain\StatusInst.class
 com\web\pfc\SpringPfc\Repository\InstituicaoRep.class
-com\web\pfc\SpringPfc\Controller\InstituicaoController.class
+com\web\pfc\SpringPfc\CorsConfig\CorsConfig.class
 com\web\pfc\SpringPfc\SpringPfcApplication.class
