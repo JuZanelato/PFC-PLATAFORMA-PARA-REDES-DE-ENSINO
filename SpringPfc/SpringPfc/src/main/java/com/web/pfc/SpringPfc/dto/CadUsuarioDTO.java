@@ -1,0 +1,5 @@
+package com.web.pfc.SpringPfc.dto;
+
+public record CadUsuarioDTO(
+        String nome, String email, String senha, Integer instituicaoId, String perfil) {
+}
