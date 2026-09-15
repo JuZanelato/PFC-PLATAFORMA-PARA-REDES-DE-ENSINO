@@ -124,3 +124,19 @@
   color: #6b7280;
   font-style: italic;
 }
+
+.pix-chave {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+ 
+.pix-vazia {
+  color: #999;
+  font-style: italic;
+}
+ 
+.btn-copiar {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+}

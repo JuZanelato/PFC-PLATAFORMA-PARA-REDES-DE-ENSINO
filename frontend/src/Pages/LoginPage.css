@@ -1,0 +1,26 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+ 
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 320px;
+  padding: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+ 
+.login-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+ 
+.erro-geral {
+  color: #c0392b;
+}

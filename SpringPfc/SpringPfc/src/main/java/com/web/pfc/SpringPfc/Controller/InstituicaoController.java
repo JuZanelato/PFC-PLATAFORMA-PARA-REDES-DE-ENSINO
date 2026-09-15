@@ -3,6 +3,8 @@ package com.web.pfc.SpringPfc.Controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,16 +33,16 @@ public class InstituicaoController {
         this.instituicaorep = instituicaorep;
     }
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-        public Instituicao save(@RequestBody @Valid Instituicao instituicao) {
-            return instituicaorep.save(instituicao);
-        }
+    public Instituicao save(@RequestBody @Valid Instituicao instituicao) {
+        return instituicaorep.save(instituicao);
+    }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Integer id) {
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public void delete(@PathVariable("id") Long id) {
 
         instituicaorep.findById(id)
                 .map(instituicao -> {
@@ -49,14 +51,14 @@ public class InstituicaoController {
                 })
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Registro nao encontrado"
-                ));
+                        "Registro nao encontrado"));
     }
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public void update(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @RequestBody @Valid Instituicao instituicao) {
 
         instituicaorep.findById(id)
@@ -70,8 +72,7 @@ public class InstituicaoController {
                 })
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Registro nao encontrado"
-                ));
+                        "Registro nao encontrado"));
     }
 
     @GetMapping
@@ -81,8 +82,7 @@ public class InstituicaoController {
                 .matching()
                 .withIgnoreCase()
                 .withStringMatcher(
-                        ExampleMatcher.StringMatcher.CONTAINING
-                );
+                        ExampleMatcher.StringMatcher.CONTAINING);
 
         Example<Instituicao> example = Example.of(filtro, matcher);
 
@@ -91,12 +91,63 @@ public class InstituicaoController {
 
     @GetMapping("{id}")
     public Instituicao getInstituicaoById(
-            @PathVariable("id") Integer id) {
+            @PathVariable("id") Long id) {
 
         return instituicaorep.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Instituicao nao encontrada"
-                ));
+                        "Instituicao nao encontrada"));
+    }
+
+
+    @GetMapping("{id}/pix")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'GESTOR', 'ADMINISTRADOR')")
+    public ResponseEntity<String> consultarChavePix(@PathVariable("id") Long id) {
+
+        Instituicao instituicao = instituicaorep.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Instituição não encontrada"));
+
+        return ResponseEntity.ok(instituicao.getChavePix());
+    }
+
+    @PutMapping("{id}/pix")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
+    public ResponseEntity<String> alterarChavePix(
+            @PathVariable("id") Long id,
+            @RequestBody String chavePix) {
+
+        if (chavePix == null || chavePix.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("A chave PIX não pode estar vazia.");
+        }
+        if (chavePix.length() > 77) {
+            return ResponseEntity.badRequest().body("A chave PIX deve possuir no máximo 77 caracteres.");
+        }
+
+        Instituicao instituicao = instituicaorep.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Instituição não encontrada"));
+
+        instituicao.setChavePix(chavePix.trim());
+        instituicaorep.save(instituicao);
+
+        return ResponseEntity.ok("Chave PIX alterada com sucesso.");
+    }
+
+    @DeleteMapping("{id}/pix")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
+    public ResponseEntity<String> removerChavePix(@PathVariable("id") Long id) {
+
+        Instituicao instituicao = instituicaorep.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Instituição não encontrada"));
+
+        instituicao.setChavePix(null);
+        instituicaorep.save(instituicao);
+
+        return ResponseEntity.ok("Chave PIX removida com sucesso.");
     }
 }

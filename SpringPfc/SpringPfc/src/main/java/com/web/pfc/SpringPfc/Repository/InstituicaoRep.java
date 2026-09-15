@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.web.pfc.SpringPfc.domain.Instituicao;
 
 @Repository
-public interface InstituicaoRep extends JpaRepository<Instituicao, Integer> {
+public interface InstituicaoRep extends JpaRepository<Instituicao, Long> {
 
 }
