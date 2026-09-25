@@ -3,13 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import authService from "../Services/authService";
 import instituicaoService from "../Services/InstituicaoService";
 import "./CadastroPage.css";
- 
+
 const PERFIL_OPTIONS = [
   { value: "FUNCIONARIO", label: "Funcionário" },
   { value: "GESTOR", label: "Gestor" },
   { value: "ADMINISTRADOR", label: "Administrador" },
 ];
- 
+
 const VAZIO = {
   nome: "",
   email: "",
@@ -18,25 +18,25 @@ const VAZIO = {
   instituicaoId: "",
   perfil: "FUNCIONARIO",
 };
- 
+
 export default function CadastroPage() {
   const [form, setForm] = useState(VAZIO);
   const [instituicoes, setInstituicoes] = useState([]);
   const [erros, setErros] = useState({});
   const [cadastrando, setCadastrando] = useState(false);
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     instituicaoService
       .listar()
       .then(setInstituicoes)
       .catch(() => setErros((prev) => ({ ...prev, geral: "Não foi possível carregar as instituições." })));
   }, []);
- 
+
   const handleChange = (campo) => (e) => {
     setForm((prev) => ({ ...prev, [campo]: e.target.value }));
   };
- 
+
   const validar = () => {
     const novosErros = {};
     if (!form.nome.trim()) novosErros.nome = "Nome é obrigatório";
@@ -48,11 +48,11 @@ export default function CadastroPage() {
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
- 
+
     setCadastrando(true);
     try {
       await authService.cadastrar({
@@ -70,70 +70,70 @@ export default function CadastroPage() {
       setCadastrando(false);
     }
   };
- 
+
   return (
-<div className="cadastro-page">
-<form className="cadastro-form" onSubmit={handleSubmit}>
-<h1>Criar conta</h1>
- 
+    <div className="cadastro-page">
+      <form className="cadastro-form" onSubmit={handleSubmit}>
+        <h1>Criar conta</h1>
+
         {erros.geral && <p className="erro-geral">{erros.geral}</p>}
- 
+
         <label>
           Nome
-<input type="text" value={form.nome} onChange={handleChange("nome")} />
+          <input type="text" value={form.nome} onChange={handleChange("nome")} />
           {erros.nome && <span className="erro-campo">{erros.nome}</span>}
-</label>
- 
+        </label>
+
         <label>
           E-mail
-<input type="email" value={form.email} onChange={handleChange("email")} />
+          <input type="email" value={form.email} onChange={handleChange("email")} />
           {erros.email && <span className="erro-campo">{erros.email}</span>}
-</label>
- 
+        </label>
+
         <label>
           Senha
-<input type="password" value={form.senha} onChange={handleChange("senha")} />
+          <input type="password" value={form.senha} onChange={handleChange("senha")} />
           {erros.senha && <span className="erro-campo">{erros.senha}</span>}
-</label>
- 
+        </label>
+
         <label>
           Confirmar senha
-<input type="password" value={form.confirmarSenha} onChange={handleChange("confirmarSenha")} />
+          <input type="password" value={form.confirmarSenha} onChange={handleChange("confirmarSenha")} />
           {erros.confirmarSenha && <span className="erro-campo">{erros.confirmarSenha}</span>}
-</label>
- 
+        </label>
+
         <label>
           Instituição
-<select value={form.instituicaoId} onChange={handleChange("instituicaoId")}>
-<option value="">Selecione...</option>
+          <select value={form.instituicaoId} onChange={handleChange("instituicaoId")}>
+            <option value="">Selecione...</option>
             {instituicoes.map((inst) => (
-<option key={inst.id} value={inst.id}>
+              <option key={inst.id} value={inst.id}>
                 {inst.nome}
-</option>
+              </option>
             ))}
-</select>
+          </select>
           {erros.instituicaoId && <span className="erro-campo">{erros.instituicaoId}</span>}
-</label>
- 
+        </label>
+
         <label>
           Perfil
-<select value={form.perfil} onChange={handleChange("perfil")}>
+          <select value={form.perfil} onChange={handleChange("perfil")}>
             {PERFIL_OPTIONS.map((opcao) => (
-<option key={opcao.value} value={opcao.value}>
+              <option key={opcao.value} value={opcao.value}>
                 {opcao.label}
-</option>
+              </option>
             ))}
-</select>
-</label>
- 
+          </select>
+        </label>
+
         <button type="submit" disabled={cadastrando}>
           {cadastrando ? "Cadastrando..." : "Cadastrar"}
-</button>
- 
+        </button>
+
         <p>
           Já tem conta? <Link to="/login">Entrar</Link>
-</p>
-</form>
-</div>
+        </p>
+      </form>
+    </div>
   );
 }
