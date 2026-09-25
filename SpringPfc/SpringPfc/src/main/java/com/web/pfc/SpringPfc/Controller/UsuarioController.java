@@ -29,8 +29,8 @@ public class UsuarioController {
 
     @PatchMapping("/{id}/inativar")
     @PreAuthorize("hasAnyRole('GESTOR','ADMINISTRADOR')")
-    public ResponseEntity<Void> inativar(@PathVariable Long id) {
-        usuarioService.inativar(id);
+    public ResponseEntity<Void> inativar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.inativar(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }
 }

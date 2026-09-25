@@ -12,6 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRep usuarioRep;
+    private final AuditoriaService auditoriaService;
 
     public UsuarioRespDTO toRespDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
@@ -22,9 +23,10 @@ public class UsuarioService {
         return usuarioRep.findAll().stream().map(this::toRespDTO).toList();
     }
 
-    public void inativar(Long id) {
+    public void inativar(Long id, Usuario responsavel) {
         Usuario usuario = usuarioRep.findById(id).orElseThrow(() -> new NegocioException("Usuário não encontrado."));
         usuario.setAtivo(false);
         usuarioRep.save(usuario);
+        auditoriaService.registrarInativacaoUsuario(responsavel, id);
     }
 }
