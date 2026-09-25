@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,33 +22,41 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
+import com.web.pfc.SpringPfc.Service.AuditoriaService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
+import com.web.pfc.SpringPfc.domain.Usuario;
 
 @RestController
 @RequestMapping("api/Instituicao")
 public class InstituicaoController {
 
     private InstituicaoRep instituicaorep;
+    private AuditoriaService auditoriaService;
 
-    public InstituicaoController(InstituicaoRep instituicaorep) {
+    public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService) {
         this.instituicaorep = instituicaorep;
+        this.auditoriaService = auditoriaService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
-    public Instituicao save(@RequestBody @Valid Instituicao instituicao) {
-        return instituicaorep.save(instituicao);
+    public Instituicao save(@RequestBody @Valid Instituicao instituicao,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        Instituicao salva = instituicaorep.save(instituicao);
+        auditoriaService.registrarCriacaoInstituicao(usuarioLogado, salva.getId());
+        return salva;
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public void delete(@PathVariable("id") Long id) {
+    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
 
         instituicaorep.findById(id)
                 .map(instituicao -> {
                     instituicaorep.delete(instituicao);
+                    auditoriaService.registrarExclusaoInstituicao(usuarioLogado, id);
                     return Void.TYPE;
                 })
                 .orElseThrow(() -> new ResponseStatusException(
@@ -60,13 +69,15 @@ public class InstituicaoController {
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public void update(
             @PathVariable Long id,
-            @RequestBody @Valid Instituicao instituicao) {
+            @RequestBody @Valid Instituicao instituicao,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
 
         instituicaorep.findById(id)
                 .map(instituicaoExistente -> {
 
                     instituicao.setId(instituicaoExistente.getId());
                     instituicaorep.save(instituicao);
+                    auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
 
                     return instituicao;
 
@@ -116,7 +127,8 @@ public class InstituicaoController {
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
     public ResponseEntity<String> alterarChavePix(
             @PathVariable("id") Long id,
-            @RequestBody String chavePix) {
+            @RequestBody String chavePix,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
 
         if (chavePix == null || chavePix.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("A chave PIX não pode estar vazia.");
@@ -132,13 +144,15 @@ public class InstituicaoController {
 
         instituicao.setChavePix(chavePix.trim());
         instituicaorep.save(instituicao);
+        auditoriaService.registrarAlteracaoPix(usuarioLogado, id);
 
         return ResponseEntity.ok("Chave PIX alterada com sucesso.");
     }
 
     @DeleteMapping("{id}/pix")
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMINISTRADOR')")
-    public ResponseEntity<String> removerChavePix(@PathVariable("id") Long id) {
+    public ResponseEntity<String> removerChavePix(@PathVariable("id") Long id,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
 
         Instituicao instituicao = instituicaorep.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -147,6 +161,7 @@ public class InstituicaoController {
 
         instituicao.setChavePix(null);
         instituicaorep.save(instituicao);
+        auditoriaService.registrarRemocaoPix(usuarioLogado, id);
 
         return ResponseEntity.ok("Chave PIX removida com sucesso.");
     }

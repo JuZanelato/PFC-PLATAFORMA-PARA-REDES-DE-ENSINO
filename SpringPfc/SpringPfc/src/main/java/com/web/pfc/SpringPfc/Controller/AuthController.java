@@ -22,8 +22,9 @@ public class AuthController {
 
     @PostMapping("/cadastro")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<UsuarioRespDTO> cadastrar(@RequestBody @Valid CadUsuarioDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.cadastrar(dto));
+    public ResponseEntity<UsuarioRespDTO> cadastrar(@RequestBody @Valid CadUsuarioDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.cadastrar(dto, usuarioLogado));
     }
 
     @PostMapping("/login")
