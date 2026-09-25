@@ -35,6 +35,7 @@ public class InstituicaoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public Instituicao save(@RequestBody @Valid Instituicao instituicao) {
         return instituicaorep.save(instituicao);
     }
@@ -98,7 +99,6 @@ public class InstituicaoController {
                         HttpStatus.NOT_FOUND,
                         "Instituicao nao encontrada"));
     }
-
 
     @GetMapping("{id}/pix")
     @PreAuthorize("hasAnyRole('FUNCIONARIO', 'GESTOR', 'ADMINISTRADOR')")
