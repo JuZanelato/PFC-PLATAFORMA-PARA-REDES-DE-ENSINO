@@ -5,12 +5,12 @@ import authService from "../Services/authService";
 import InstituicaoForm from "../Components/InstituicaoForm";
 import InstituicaoTable from "../Components/InstituicaoTable";
 import "./InstituicaoPages.css";
- 
+
 export default function InstituicaoPage() {
   const { instituicoes, carregando, erro, salvar, excluir } = useInstituicao();
   const [selecionada, setSelecionada] = useState(null);
   const usuario = authService.usuarioLogado();
- 
+
   const handleExcluir = async (instituicao) => {
     const confirmar = window.confirm(
       `Excluir a instituição "${instituicao.nome}"? Essa ação não pode ser desfeita.`
@@ -18,37 +18,40 @@ export default function InstituicaoPage() {
     if (!confirmar) return;
     await excluir(instituicao.id);
   };
- 
+
   const handleSalvar = async (form) => {
     await salvar(form);
     setSelecionada(null);
   };
- 
+
   return (
-<div className="instituicao-page">
-<header>
-<h1>Gestão de Instituições</h1>
+    <div className="instituicao-page">
+      <header>
+        <h1>Gestão de Instituições</h1>
         {usuario?.perfil === "ADMINISTRADOR" && (
-<Link to="/cadastro">Cadastrar novo usuário</Link>
+          <>
+            <Link to="/cadastro">Cadastrar novo usuário</Link>
+            <Link to="/auditoria">Log de auditoria</Link>
+          </>
         )}
-</header>
- 
+      </header>
+
       <InstituicaoForm
         instituicaoSelecionada={selecionada}
         onSalvar={handleSalvar}
         onCancelar={() => setSelecionada(null)}
       />
- 
+
       {erro && <p className="erro-geral">{erro}</p>}
       {carregando ? (
-<p>Carregando...</p>
+        <p>Carregando...</p>
       ) : (
-<InstituicaoTable
+        <InstituicaoTable
           instituicoes={instituicoes}
           onEditar={setSelecionada}
           onExcluir={handleExcluir}
         />
       )}
-</div>
+    </div>
   );
 }
