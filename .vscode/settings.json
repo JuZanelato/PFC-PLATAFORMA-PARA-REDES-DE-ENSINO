@@ -2,5 +2,6 @@
     "cSpell.words": [
         "preenchido"
     ],
-    "xml.downloadExternalResources.enabled": true
+    "xml.downloadExternalResources.enabled": true,
+    "java.debug.settings.onBuildFailureProceed": true
 }

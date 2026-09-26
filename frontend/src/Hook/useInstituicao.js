@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import instituicaoService from "../Services/instituicaoService";
- 
-export function useInstituicao() {
+
+export function useInstituicao(filtroInicial = {}) {
   const [instituicoes, setInstituicoes] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
- 
-  const carregar = useCallback(async (filtro = {}) => {
+
+  const carregar = useCallback(async (filtro = filtroInicial) => {
     setCarregando(true);
     setErro(null);
     try {
@@ -18,12 +18,12 @@ export function useInstituicao() {
     } finally {
       setCarregando(false);
     }
-  }, []);
- 
+  }, [filtroInicial]);
+
   useEffect(() => {
     carregar();
   }, [carregar]);
- 
+
   const salvar = async (instituicao) => {
     if (instituicao.id) {
       await instituicaoService.atualizar(instituicao.id, instituicao);
@@ -32,11 +32,11 @@ export function useInstituicao() {
     }
     await carregar();
   };
- 
+
   const excluir = async (id) => {
     await instituicaoService.excluir(id);
     await carregar();
   };
- 
+
   return { instituicoes, carregando, erro, carregar, salvar, excluir };
 }

@@ -17,7 +17,7 @@ public class OpenApiConfig {
                 .addSecurityItem(new SecurityRequirement().addList(schemeName))
                 .components(new Components().addSecuritySchemes(schemeName,
                         new SecurityScheme()
-                                .name(schemeName)
+                              .name(schemeName)
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")));
