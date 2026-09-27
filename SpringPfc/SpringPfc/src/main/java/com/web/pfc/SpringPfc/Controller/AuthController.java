@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,6 +19,11 @@ public class AuthController {
     private final AuthService authService;
     private final SenhaService senhaService;
 
+    @PostMapping("/cadastro")
+    public ResponseEntity<UsuarioRespDTO> cadastrar(@RequestBody @Valid CadUsuarioDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.cadastrar(dto, usuarioLogado));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<TokenRespDTO> login(@RequestBody @Valid LoginDTO dto) {
