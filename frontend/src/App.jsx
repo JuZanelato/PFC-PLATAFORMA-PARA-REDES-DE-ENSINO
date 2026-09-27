@@ -10,14 +10,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/cadastro"
-          element={
-            <RotaProtegida perfisPermitidos={["ADMINISTRADOR"]}>
-              <CadastroPage />
-            </RotaProtegida>
-          }
-        />
+        <Route path="/cadastro" element={<CadastroPage />} />
         <Route
           path="/auditoria"
           element={

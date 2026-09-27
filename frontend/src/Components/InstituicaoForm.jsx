@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STATUS_OPTIONS } from "../Services/instituicaoService";
+import { STATUS_OPTIONS } from "../Services/InstituicaoService";
 import cepService from "../Services/cepService";
 
 const VAZIO = {
@@ -10,6 +10,7 @@ const VAZIO = {
   endereco: "",
   email: "",
   status: "ATIVA",
+  chavePix: "",
 };
 
 export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCancelar }) {

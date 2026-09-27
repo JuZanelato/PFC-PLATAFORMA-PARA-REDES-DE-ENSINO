@@ -8,9 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 import java.time.LocalDateTime;
 
@@ -34,15 +36,16 @@ public class Instituicao {
     @Column(name = "cnpj", length = 14)
     private String cnpj;
 
-
     @Column(name = "cep", length = 9)
     private String cep;
 
-   
+    @Size(max = 77, message = "A chave PIX deve possuir no máximo 77 caracteres.")
+    @Column(name = "chave_pix", length = 77)
+    private String chavePix;
+
     @NotEmpty(message = "Número obrigatório ser preenchido")
     @Column(name = "numero", length = 10)
     private String numero;
-
 
     @NotEmpty(message = "Endereço obrigatório ser preenchido")
     @Column(name = "endereco", length = 150)
