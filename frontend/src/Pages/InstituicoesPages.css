@@ -121,6 +121,30 @@
   color: #5C1730;
 }
 
+.checkbox-termos {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #4b5563;
+}
+
+.checkbox-termos input[type="checkbox"] {
+  margin-top: 0.15rem;
+  width: auto;
+  cursor: pointer;
+}
+
+.checkbox-termos a {
+  color: #7A1F3D;
+  text-decoration: underline;
+}
+
+.checkbox-termos a:hover {
+  color: #5C1730;
+}
+
 .form-acoes {
   display: flex;
   gap: 0.6rem;

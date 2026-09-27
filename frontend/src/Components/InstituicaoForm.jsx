@@ -18,6 +18,7 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
   const [salvando, setSalvando] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [enderecoManual, setEnderecoManual] = useState(false);
+  const [aceitouTermos, setAceitouTermos] = useState(false);
 
   useEffect(() => {
     setForm(instituicaoSelecionada || VAZIO);
@@ -77,6 +78,10 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
       if (!form.cep?.trim()) novosErros.cep = "CEP é obrigatório";
       else if (form.cep.replace(/\D/g, "").length !== 8)
         novosErros.cep = "CEP deve ter 8 dígitos";
+
+    if (!aceitouTermos) {
+  novosErros.termos = "É necessário concordar com os Termos e a Política de Privacidade";
+}  
     }
 
     if (!form.numero?.trim()) novosErros.numero = "Número é obrigatório";
@@ -101,6 +106,10 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validar()) return;
+
+    setForm(VAZIO);
+setEnderecoManual(false);
+setAceitouTermos(false); 
 
     setSalvando(true);
     try {
@@ -248,6 +257,21 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
           ))}
         </select>
       </label>
+
+      <label className="checkbox-termos">
+  <input
+    type="checkbox"
+    checked={aceitouTermos}
+    onChange={(e) => setAceitouTermos(e.target.checked)}
+  />
+  <span>
+    Li e concordo com os{" "}
+    <a href="/politica-privacidade" target="_blank" rel="noopener noreferrer">
+      Termos de Uso e a Política de Privacidade
+    </a>
+  </span>
+</label>
+{erros.termos && <span className="erro-campo">{erros.termos}</span>}
 
       <div className="form-acoes">
         <button type="submit" disabled={salvando}>
