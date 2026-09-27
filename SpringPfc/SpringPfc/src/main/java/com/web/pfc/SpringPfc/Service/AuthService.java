@@ -29,29 +29,31 @@ public class AuthService {
     private final AuditoriaService auditoriaService;
 
     public UsuarioRespDTO cadastrar(CadUsuarioDTO dto, Usuario responsavel) {
-    if (usuarioRep.existsByEmail(dto.email())) {
-        throw new NegocioException("E-mail já cadastrado.");
+        if (usuarioRep.existsByEmail(dto.email())) {
+            throw new NegocioException("E-mail já cadastrado.");
+        }
+
+        var instituicao = instituicaoRep.findById(dto.instituicaoId())
+                .orElseThrow(() -> new NegocioException(
+                        "Instituição não encontrada — usuário deve estar associado a uma instituição (RN01)."));
+
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
+        usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
+        usuario.setPerfil(Perfil.valueOf(dto.perfil() != null ? dto.perfil() : "FUNCIONARIO"));
+        usuario.setInstituicao(instituicao);
+        usuario.setAtivo(true);
+        usuario.setCriadoEm(LocalDateTime.now());
+
+        Usuario salvo = usuarioRep.save(usuario);
+
+        String emailResponsavel = (responsavel != null) ? responsavel.getEmail() : salvo.getEmail() + " (autocadastro)";
+        auditoriaService.registrarCriacaoUsuario(emailResponsavel, salvo.getEmail());
+
+        return new UsuarioRespDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(),
+                salvo.getPerfil().name(), instituicao.getNome());
     }
-
-    var instituicao = instituicaoRep.findById(dto.instituicaoId())
-        .orElseThrow(() -> new NegocioException(
-            "Instituição não encontrada — usuário deve estar associado a uma instituição (RN01)."));
-
-    Usuario usuario = new Usuario();
-    usuario.setNome(dto.nome());
-    usuario.setEmail(dto.email());
-    usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
-    usuario.setPerfil(Perfil.valueOf(dto.perfil() != null ? dto.perfil() : "FUNCIONARIO"));
-    usuario.setInstituicao(instituicao);
-    usuario.setAtivo(true);
-    usuario.setCriadoEm(LocalDateTime.now());
-
-    Usuario salvo = usuarioRep.save(usuario);
-    auditoriaService.registrarCriacaoUsuario(responsavel.getEmail(), salvo.getEmail());
-
-    return new UsuarioRespDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(),
-        salvo.getPerfil().name(), instituicao.getNome());
-}
 
     public TokenRespDTO login(LoginDTO dto) {
         try {

@@ -215,6 +215,31 @@
   color: #c0392b;
 }
 
+.pix-chave {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pix-vazia {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.btn-copiar {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #cfcfd8;
+  border-radius: 4px;
+  background: none;
+  color: #7A1F3D;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-copiar:hover {
+  background: #F5E6EA;
+}
+
 .tabela-vazia {
   color: #6b7280;
   font-style: italic;

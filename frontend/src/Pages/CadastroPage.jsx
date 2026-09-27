@@ -28,14 +28,10 @@ export default function CadastroPage() {
 
   useEffect(() => {
     instituicaoService
-      .listar()
+      .listarPublicas()
       .then(setInstituicoes)
       .catch(() => setErros((prev) => ({ ...prev, geral: "Não foi possível carregar as instituições." })));
   }, []);
-
-  const handleChange = (campo) => (e) => {
-    setForm((prev) => ({ ...prev, [campo]: e.target.value }));
-  };
 
   const validar = () => {
     const novosErros = {};

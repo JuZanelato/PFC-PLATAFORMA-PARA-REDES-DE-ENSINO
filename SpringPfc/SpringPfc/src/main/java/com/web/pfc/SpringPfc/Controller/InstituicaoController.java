@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,21 +22,26 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
+import com.web.pfc.SpringPfc.Service.AuditoriaService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
 import com.web.pfc.SpringPfc.domain.Usuario;
+import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
 
 @RestController
 @RequestMapping("api/Instituicao")
 public class InstituicaoController {
 
     private InstituicaoRep instituicaorep;
+    private AuditoriaService auditoriaService;
 
-    public InstituicaoController(InstituicaoRep instituicaorep) {
+    public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService) {
         this.instituicaorep = instituicaorep;
+        this.auditoriaService = auditoriaService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public Instituicao save(
             @RequestBody @Valid Instituicao instituicao,
             @AuthenticationPrincipal Usuario usuarioLogado) {
@@ -43,16 +49,21 @@ public class InstituicaoController {
         instituicao.setCadastradoPor(usuarioLogado.getEmail());
         instituicao.setCriadoEm(LocalDateTime.now());
 
-        return instituicaorep.save(instituicao);
+        Instituicao salva = instituicaorep.save(instituicao);
+        auditoriaService.registrarCriacaoInstituicao(usuarioLogado, salva.getId());
+
+        return salva;
     }
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("id") Long id) {
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
 
         instituicaorep.findById(id)
                 .map(instituicao -> {
                     instituicaorep.delete(instituicao);
+                    auditoriaService.registrarExclusaoInstituicao(usuarioLogado, id);
                     return Void.TYPE;
                 })
                 .orElseThrow(() -> new ResponseStatusException(
@@ -63,9 +74,11 @@ public class InstituicaoController {
 
     @PutMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public void update(
             @PathVariable Long id,
-            @RequestBody @Valid Instituicao instituicao) {
+            @RequestBody @Valid Instituicao instituicao,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
 
         instituicaorep.findById(id)
                 .map(instituicaoExistente -> {
@@ -75,6 +88,7 @@ public class InstituicaoController {
                     instituicao.setCriadoEm(instituicaoExistente.getCriadoEm());
 
                     instituicaorep.save(instituicao);
+                    auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
 
                     return instituicao;
 
@@ -109,5 +123,12 @@ public class InstituicaoController {
                         HttpStatus.NOT_FOUND,
                         "Instituicao nao encontrada"
                 ));
+    }
+
+    @GetMapping("/publicas")
+    public List<InstituicaoResumoDTO> listarPublicas() {
+        return instituicaorep.findAll().stream()
+                .map(i -> new InstituicaoResumoDTO(i.getId(), i.getNome()))
+                .toList();
     }
 }

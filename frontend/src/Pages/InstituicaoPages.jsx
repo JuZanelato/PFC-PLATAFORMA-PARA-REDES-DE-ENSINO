@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useInstituicao } from "../Hook/useInstituicao";
 import authService from "../Services/authService";
 import InstituicaoForm from "../Components/InstituicaoForm";
@@ -60,6 +60,9 @@ export default function InstituicaoPages() {
     <div className="instituicao-page">
       <header className="instituicao-page-header">
         <h1>Minhas instituições</h1>
+        {usuarioLogado?.perfil === "ADMINISTRADOR" && (
+          <Link to="/auditoria">Log de auditoria</Link>
+        )}
         {!mostrarForm && (
           <button type="button" onClick={handleNovo}>
             + Nova instituição

@@ -12,6 +12,7 @@ export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) 
           <th>Endereço</th>
           <th>E-mail</th>
           <th>Status</th>
+          <th>Chave PIX</th>
           <th>Cadastrado por</th>
           <th>Criado em</th>
           <th>Ações</th>
@@ -28,6 +29,23 @@ export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) 
               <span className={`status-badge status-${inst.status?.toLowerCase()}`}>
                 {inst.status}
               </span>
+            </td>
+            <td>
+              {inst.chavePix ? (
+                <span className="pix-chave">
+                  {inst.chavePix}
+                  <button
+                    type="button"
+                    className="btn-copiar"
+                    onClick={() => navigator.clipboard.writeText(inst.chavePix)}
+                    title="Copiar chave"
+                  >
+                    Copiar
+                  </button>
+                </span>
+              ) : (
+                <span className="pix-vazia">Não informada</span>
+              )}
             </td>
             <td>{inst.cadastradoPor}</td>
             <td>
