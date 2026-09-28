@@ -57,7 +57,9 @@ export default function LoginPage() {
                     {entrando ? "Entrando..." : "Entrar"}
                 </button>
 
-
+                <p>
+                    Não tem conta? <Link to="/cadastro">Cadastre-se</Link>
+                </p>
             </form>
         </div>
     );
