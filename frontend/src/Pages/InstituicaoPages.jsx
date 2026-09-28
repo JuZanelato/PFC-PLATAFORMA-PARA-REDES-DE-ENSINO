@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useInstituicao } from "../Hook/useInstituicao";
 import authService from "../Services/authService";
 import InstituicaoForm from "../Components/InstituicaoForm";
@@ -8,6 +8,7 @@ import "./InstituicoesPages.css";
 
 export default function InstituicaoPages() {
   const usuarioLogado = authService.usuarioLogado();
+  const navigate = useNavigate();
 
   const filtroInicial = useMemo(
     () => ({ cadastradoPor: usuarioLogado?.email }),
@@ -56,18 +57,38 @@ export default function InstituicaoPages() {
     await excluir(instituicao.id);
   };
 
+  const handleSair = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // sessão já expirada no servidor: o token local é limpo mesmo assim
+    }
+    navigate("/login");
+  };
+
   return (
     <div className="instituicao-page">
       <header className="instituicao-page-header">
         <h1>Minhas instituições</h1>
-        {usuarioLogado?.perfil === "ADMINISTRADOR" && (
-          <Link to="/auditoria">Log de auditoria</Link>
-        )}
-        {!mostrarForm && (
-          <button type="button" onClick={handleNovo}>
-            + Nova instituição
+
+        <div className="instituicao-page-acoes">
+          {!mostrarForm && (
+            <button type="button" onClick={handleNovo}>
+              + Nova instituição
+            </button>
+          )}
+          <Link to="/cadastro" className="link-acao">
+            Cadastrar usuário
+          </Link>
+          {usuarioLogado?.perfil === "ADMINISTRADOR" && (
+            <Link to="/auditoria" className="link-acao">
+              Log de auditoria
+            </Link>
+          )}
+          <button type="button" className="btn-secundario" onClick={handleSair}>
+            Sair
           </button>
-        )}
+        </div>
       </header>
 
       {mostrarForm && (

@@ -268,3 +268,30 @@
   color: #6b7280;
   font-style: italic;
 }
+
+/* ===== Ações do cabeçalho (novo) ===== */
+.instituicao-page-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.link-acao {
+  color: #7A1F3D;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.link-acao:hover {
+  color: #5C1730;
+}
+
+.instituicao-page-header .btn-secundario {
+  background: #e2e2e8;
+  color: #1f2430;
+}
+
+.instituicao-page-header .btn-secundario:hover {
+  background: #d5d5dd;
+}
