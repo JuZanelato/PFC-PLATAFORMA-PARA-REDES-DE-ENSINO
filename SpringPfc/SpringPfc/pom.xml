@@ -81,13 +81,6 @@
 			<version>3.0.3</version>
 		</dependency>
 	</dependencies>
-	
-//ATVTU
-		<dependency>
-   			 <groupId>com.h2database</groupId>
-   			 <artifactId>h2</artifactId>
- 		  	 <scope>test</scope>
-	</dependency>
 
 	<build>
 		<plugins>
@@ -112,4 +105,3 @@
 	</build>
 
 </project>
- 
