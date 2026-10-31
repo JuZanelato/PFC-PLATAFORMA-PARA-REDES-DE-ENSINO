@@ -3,6 +3,7 @@ import LoginPage from "./Pages/LoginPage";
 import CadastroPage from "./Pages/CadastroPage";
 import InstituicaoPages from "./Pages/InstituicaoPages";
 import AuditoriaPage from "./Pages/AuditoriaPage";
+import PoliticaPrivacidadePage from "./Pages/PoliticaPrivacidadePage";
 import RotaProtegida from "./Components/RotaProtegida";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<CadastroPage />} />
+        <Route path="/politica-privacidade" element={<PoliticaPrivacidadePage />} />
         <Route
           path="/auditoria"
           element={
