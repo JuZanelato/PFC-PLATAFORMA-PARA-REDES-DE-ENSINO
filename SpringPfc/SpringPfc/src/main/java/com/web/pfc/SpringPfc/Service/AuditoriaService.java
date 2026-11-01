@@ -65,4 +65,20 @@ public class AuditoriaService {
         log.setDataHora(LocalDateTime.now());
         logAuditoriaRep.save(log);
     }
+
+        public void registrarCriacaoRecurso(Usuario usuario, Long recursoId) {
+        salvar(usuario.getEmail(), "RECURSO_CRIADO:" + recursoId);
+    }
+
+    public void registrarAlteracaoRecurso(Usuario usuario, Long recursoId) {
+        salvar(usuario.getEmail(), "RECURSO_ALTERADO:" + recursoId);
+    }
+
+    public void registrarInativacaoRecurso(Usuario usuario, Long recursoId) {
+        salvar(usuario.getEmail(), "RECURSO_INATIVADO:" + recursoId);
+    }
+
+    public void registrarAlteracaoDisponibilidadeRecurso(Usuario usuario, Long recursoId, boolean disponivel) {
+        salvar(usuario.getEmail(), "RECURSO_DISPONIBILIDADE_ALTERADA:" + recursoId + ":" + disponivel);
+    }
 }
