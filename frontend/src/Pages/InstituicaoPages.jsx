@@ -88,6 +88,10 @@ export default function InstituicaoPages() {
           <button type="button" className="btn-secundario" onClick={handleSair}>
             Sair
           </button>
+
+                    <Link to="/recursos" className="link-acao">
+            Gestão de recursos
+          </Link>
         </div>
       </header>
 

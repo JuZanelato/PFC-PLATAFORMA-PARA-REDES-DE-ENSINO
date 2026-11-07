@@ -4,6 +4,7 @@ import CadastroPage from "./Pages/CadastroPage";
 import InstituicaoPages from "./Pages/InstituicaoPages";
 import AuditoriaPage from "./Pages/AuditoriaPage";
 import RotaProtegida from "./Components/RotaProtegida";
+import RecursosPage from "./Pages/RecursosPage";
 
 function App() {
   return (
@@ -24,6 +25,16 @@ function App() {
           element={
             <RotaProtegida>
               <InstituicaoPages />
+            </RotaProtegida>
+          }
+        />
+
+
+        <Route
+          path="/recursos"
+          element={
+            <RotaProtegida>
+              <RecursosPage />
             </RotaProtegida>
           }
         />
