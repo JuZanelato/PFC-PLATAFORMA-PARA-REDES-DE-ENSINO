@@ -15,18 +15,7 @@ export const CONDICAO_OPTIONS = [
   { value: "RUIM", label: "Ruim" },
 ];
 
-// Transforma o erro do axios em um texto seguro para exibir na tela
-export function mensagemDeErro(err, padrao) {
-  const data = err?.response?.data;
-  if (typeof data === "string" && data.trim()) return data;
-  if (Array.isArray(data?.errors) && data.errors.length > 0) {
-    return data.errors.map((e) => e.defaultMessage || e.message).join(" ");
-  }
-  if (typeof data?.detail === "string") return data.detail;
-  if (typeof data?.message === "string" && data.message) return data.message;
-  if (err?.response?.status === 403) return "Você não tem permissão para executar esta ação.";
-  return padrao;
-}
+export { mensagemDeErro } from "./mensagemErro";
 
 const recursoService = {
   listar: async () => {

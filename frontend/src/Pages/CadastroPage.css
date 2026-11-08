@@ -30,3 +30,11 @@
   color: #c0392b;
   font-size: 0.85rem;
 }
+
+.cadastro-termos {
+  font-size: 0.85rem;
+}
+
+.cadastro-termos input[type="checkbox"] {
+  cursor: pointer;
+}

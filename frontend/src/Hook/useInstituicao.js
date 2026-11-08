@@ -33,10 +33,10 @@ export function useInstituicao(filtroInicial = {}) {
     await carregar();
   };
 
-  const excluir = async (id) => {
-    await instituicaoService.excluir(id);
+  const inativar = async (id) => {
+    await instituicaoService.inativar(id);
     await carregar();
   };
 
-  return { instituicoes, carregando, erro, carregar, salvar, excluir };
+  return { instituicoes, carregando, erro, carregar, salvar, inativar };
 }

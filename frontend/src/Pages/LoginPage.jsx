@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authService from "../Services/authService";
+import { mensagemDeErro } from "../Services/mensagemErro";
 import "./LoginPage.css";
 
 export default function LoginPage() {
@@ -18,9 +19,7 @@ export default function LoginPage() {
             await authService.login(email, senha);
             navigate("/instituicoes");
         } catch (err) {
-            const mensagem =
-                err?.response?.data?.message || "E-mail ou senha inválidos.";
-            setErro(mensagem);
+            setErro(mensagemDeErro(err, "E-mail ou senha inválidos."));
         } finally {
             setEntrando(false);
         }
@@ -56,6 +55,10 @@ export default function LoginPage() {
                 <button type="submit" disabled={entrando}>
                     {entrando ? "Entrando..." : "Entrar"}
                 </button>
+
+                <p>
+                    <Link to="/recuperar-senha">Esqueci minha senha</Link>
+                </p>
 
                 <p>
                     Não tem conta? <Link to="/cadastro">Cadastre-se</Link>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authService from "../Services/authService";
-import instituicaoService from "../Services/InstituicaoService";
+import instituicaoService from "../Services/instituicaoServices";
+import { mensagemDeErro } from "../Services/mensagemErro";
 import "./CadastroPage.css";
 
 const PERFIL_OPTIONS = [
@@ -24,6 +25,7 @@ export default function CadastroPage() {
   const [instituicoes, setInstituicoes] = useState([]);
   const [erros, setErros] = useState({});
   const [cadastrando, setCadastrando] = useState(false);
+  const [aceitouTermos, setAceitouTermos] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,11 +42,15 @@ export default function CadastroPage() {
   const validar = () => {
     const novosErros = {};
     if (!form.nome.trim()) novosErros.nome = "Nome é obrigatório";
+    else if (form.nome.trim().length < 3) novosErros.nome = "Informe o nome completo";
     if (!form.email.trim()) novosErros.email = "E-mail é obrigatório";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) novosErros.email = "E-mail inválido";
     if (!form.senha) novosErros.senha = "Senha é obrigatória";
     else if (form.senha.length < 6) novosErros.senha = "Senha deve ter ao menos 6 caracteres";
     if (form.senha !== form.confirmarSenha) novosErros.confirmarSenha = "As senhas não coincidem";
     if (!form.instituicaoId) novosErros.instituicaoId = "Selecione uma instituição";
+    if (!aceitouTermos)
+      novosErros.termos = "É necessário concordar com os Termos e a Política de Privacidade";
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
   };
@@ -64,8 +70,7 @@ export default function CadastroPage() {
       });
       navigate("/login");
     } catch (err) {
-      const mensagem = err?.response?.data?.message || "Erro ao cadastrar usuário.";
-      setErros({ geral: mensagem });
+      setErros({ geral: mensagemDeErro(err, "Erro ao cadastrar usuário.") });
     } finally {
       setCadastrando(false);
     }
@@ -124,6 +129,21 @@ export default function CadastroPage() {
               </option>
             ))}
           </select>
+        </label>
+
+        <label className="cadastro-termos">
+          <span>
+            <input
+              type="checkbox"
+              checked={aceitouTermos}
+              onChange={(e) => setAceitouTermos(e.target.checked)}
+            />{" "}
+            Li e concordo com os{" "}
+            <Link to="/politica-privacidade" target="_blank" rel="noopener noreferrer">
+              Termos de Uso e a Política de Privacidade
+            </Link>
+          </span>
+          {erros.termos && <span className="erro-campo">{erros.termos}</span>}
         </label>
 
         <button type="submit" disabled={cadastrando}>

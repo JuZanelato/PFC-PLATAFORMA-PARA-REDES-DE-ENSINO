@@ -30,8 +30,8 @@ const instituicaoService = {
     await api.put(`/Instituicao/${id}`, instituicao);
   },
 
-  excluir: async (id) => {
-    await api.delete(`/Instituicao/${id}`);
+  inativar: async (id) => {
+    await api.patch(`/Instituicao/${id}/inativar`);
   },
 };
 

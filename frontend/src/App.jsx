@@ -5,6 +5,8 @@ import InstituicaoPages from "./Pages/InstituicaoPages";
 import AuditoriaPage from "./Pages/AuditoriaPage";
 import RotaProtegida from "./Components/RotaProtegida";
 import RecursosPage from "./Pages/RecursosPage";
+import PoliticaPrivacidadePage from "./Pages/PoliticaPrivacidadePage";
+import RecuperarSenhaPage from "./Pages/RecuperarSenhaPage";
 
 function App() {
   return (
@@ -12,6 +14,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<CadastroPage />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
+        <Route path="/politica-privacidade" element={<PoliticaPrivacidadePage />} />
         <Route
           path="/auditoria"
           element={

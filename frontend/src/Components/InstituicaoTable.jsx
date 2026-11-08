@@ -1,4 +1,4 @@
-export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) {
+export default function InstituicaoTable({ instituicoes, podeInativar, onEditar, onInativar }) {
   if (instituicoes.length === 0) {
     return <p className="tabela-vazia">Nenhuma instituição cadastrada ainda.</p>;
   }
@@ -53,9 +53,11 @@ export default function InstituicaoTable({ instituicoes, onEditar, onExcluir }) 
             </td>
             <td className="acoes">
               <button onClick={() => onEditar(inst)}>Editar</button>
-              <button className="btn-perigo" onClick={() => onExcluir(inst)}>
-                Excluir
-              </button>
+              {podeInativar && inst.status !== "INATIVA" && (
+                <button className="btn-perigo" onClick={() => onInativar(inst)}>
+                  Inativar
+                </button>
+              )}
             </td>
           </tr>
         ))}

@@ -21,6 +21,14 @@ const authService = {
     return data;
   },
  
+  solicitarRecuperacao: async (email) => {
+    await api.post("/auth/recuperar-senha", { email });
+  },
+
+  redefinirSenha: async (token, novaSenha) => {
+    await api.post("/auth/redefinir-senha", { token, novaSenha });
+  },
+
   logout: async () => {
     try {
       await api.post("/auth/logout");

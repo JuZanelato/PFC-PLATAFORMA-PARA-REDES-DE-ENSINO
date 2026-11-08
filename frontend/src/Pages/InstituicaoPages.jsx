@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useInstituicao } from "../Hook/useInstituicao";
 import authService from "../Services/authService";
+import { mensagemDeErro } from "../Services/mensagemErro";
 import InstituicaoForm from "../Components/InstituicaoForm";
 import InstituicaoTable from "../Components/InstituicaoTable";
 import "./InstituicoesPages.css";
@@ -15,7 +16,8 @@ export default function InstituicaoPages() {
     [usuarioLogado?.email]
   );
 
-  const { instituicoes, carregando, erro, salvar, excluir } = useInstituicao(filtroInicial);
+  const { instituicoes, carregando, erro, salvar, inativar } = useInstituicao(filtroInicial);
+  const [erroAcao, setErroAcao] = useState(null);
 
   const [searchParams] = useSearchParams();
   const [selecionada, setSelecionada] = useState(null);
@@ -49,12 +51,17 @@ export default function InstituicaoPages() {
     setMostrarForm(false);
   };
 
-  const handleExcluir = async (instituicao) => {
+  const handleInativar = async (instituicao) => {
     const confirmar = window.confirm(
-      `Excluir a instituição "${instituicao.nome}"? Essa ação não pode ser desfeita.`
+      `Inativar a instituição "${instituicao.nome}"? Ela deixará de aparecer na rede, mas o histórico será mantido.`
     );
     if (!confirmar) return;
-    await excluir(instituicao.id);
+    try {
+      setErroAcao(null);
+      await inativar(instituicao.id);
+    } catch (err) {
+      setErroAcao(mensagemDeErro(err, "Não foi possível inativar a instituição."));
+    }
   };
 
   const handleSair = async () => {
@@ -104,6 +111,7 @@ export default function InstituicaoPages() {
       )}
 
       {erro && <p className="erro-geral">{erro}</p>}
+      {erroAcao && <p className="erro-geral">{erroAcao}</p>}
 
       {!mostrarForm && !carregando && (
         <input
@@ -120,8 +128,9 @@ export default function InstituicaoPages() {
       ) : (
         <InstituicaoTable
           instituicoes={instituicoesFiltradas}
+          podeInativar={usuarioLogado?.perfil === "ADMINISTRADOR"}
           onEditar={handleEditar}
-          onExcluir={handleExcluir}
+          onInativar={handleInativar}
         />
       )}
     </div>
