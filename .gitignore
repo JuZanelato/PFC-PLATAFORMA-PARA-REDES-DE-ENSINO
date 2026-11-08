@@ -1,0 +1,6 @@
+/PFC-PLATAFORMA-PARA-REDES-DE-ENSINO/
+
+node_modules/
+target/
+*.log
+saida.txt

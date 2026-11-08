@@ -16,20 +16,18 @@ import com.web.pfc.SpringPfc.domain.StatusInst;
 
 import jakarta.persistence.EntityManager;
 
-/**
- * Teste de persistência com banco real de teste (H2 em memória).
- * A transação é revertida ao final, mantendo o banco limpo.
- */
 @SpringBootTest
 @Transactional
 class InstituicaoRepIntegrationTest {
 
-    @Autowired InstituicaoRep instituicaoRep;
-    @Autowired EntityManager entityManager;
+    @Autowired
+    InstituicaoRep instituicaoRep;
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     void deveSalvarERecuperarInstituicaoPorId() {
-        // Arrange
+
         Instituicao instituicao = new Instituicao();
         instituicao.setNome("Escola Persistência");
         instituicao.setCnpj("11222333000144");
@@ -39,13 +37,11 @@ class InstituicaoRepIntegrationTest {
         instituicao.setStatus(StatusInst.ATIVA);
         instituicao.setChavePix("11222333000144");
 
-        // Act
         Instituicao salva = instituicaoRep.save(instituicao);
-        entityManager.flush();   // força o INSERT no H2
-        entityManager.clear();   // descarta o cache para ler de verdade do banco
+        entityManager.flush(); // força o INSERT no H2
+        entityManager.clear(); // descarta o cache para ler de verdade do banco
         Optional<Instituicao> recuperada = instituicaoRep.findById(salva.getId());
 
-        // Assert
         assertNotNull(salva.getId());
         assertTrue(recuperada.isPresent());
         assertEquals("Escola Persistência", recuperada.get().getNome());

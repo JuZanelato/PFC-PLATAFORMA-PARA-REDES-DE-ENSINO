@@ -2,6 +2,8 @@ package com.web.pfc.SpringPfc.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,7 +14,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 import java.time.LocalDateTime;
 
@@ -56,7 +57,8 @@ public class Instituicao {
     @Column(name = "email", length = 150)
     private String email;
 
-    @Column(name = "status")
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "status", columnDefinition = "smallint")
     private StatusInst status;
 
     @Column(name = "cadastrado_por", length = 150)
