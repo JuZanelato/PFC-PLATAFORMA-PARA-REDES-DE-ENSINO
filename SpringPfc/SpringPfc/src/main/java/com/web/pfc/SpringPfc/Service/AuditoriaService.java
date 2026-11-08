@@ -82,6 +82,10 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "RECURSO_INATIVADO:" + recursoId);
     }
 
+    public void registrarSolicitacao(Usuario usuario, Long solicitacaoId, String evento) {
+        salvar(usuario.getEmail(), "SOLICITACAO_" + evento + ":" + solicitacaoId);
+    }
+
     public void registrarAlteracaoDisponibilidadeRecurso(Usuario usuario, Long recursoId, boolean disponivel) {
         salvar(usuario.getEmail(), "RECURSO_DISPONIBILIDADE_ALTERADA:" + recursoId + ":" + disponivel);
     }
