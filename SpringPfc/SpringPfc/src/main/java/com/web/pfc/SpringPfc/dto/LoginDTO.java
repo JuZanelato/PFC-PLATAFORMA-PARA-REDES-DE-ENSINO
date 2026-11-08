@@ -1,4 +1,8 @@
 package com.web.pfc.SpringPfc.dto;
 
-public record LoginDTO(String email, String senha) {
+import jakarta.validation.constraints.NotBlank;
+
+public record LoginDTO(
+        @NotBlank(message = "E-mail é obrigatório.") String email,
+        @NotBlank(message = "Senha é obrigatória.") String senha) {
 }

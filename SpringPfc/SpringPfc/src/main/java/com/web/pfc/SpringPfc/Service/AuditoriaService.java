@@ -38,6 +38,10 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "INSTITUICAO_EXCLUIDA:" + instituicaoId);
     }
 
+    public void registrarInativacaoInstituicao(Usuario usuario, Long instituicaoId) {
+        salvar(usuario.getEmail(), "INSTITUICAO_INATIVADA:" + instituicaoId);
+    }
+
     public void registrarAlteracaoPix(Usuario usuario, Long instituicaoId) {
         salvar(usuario.getEmail(), "PIX_ALTERADA:" + instituicaoId);
     }
@@ -66,7 +70,7 @@ public class AuditoriaService {
         logAuditoriaRep.save(log);
     }
 
-        public void registrarCriacaoRecurso(Usuario usuario, Long recursoId) {
+    public void registrarCriacaoRecurso(Usuario usuario, Long recursoId) {
         salvar(usuario.getEmail(), "RECURSO_CRIADO:" + recursoId);
     }
 

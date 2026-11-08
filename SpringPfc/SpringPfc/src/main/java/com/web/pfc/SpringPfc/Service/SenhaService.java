@@ -8,12 +8,14 @@ import com.web.pfc.SpringPfc.dto.RedefSenhaDTO;
 import com.web.pfc.SpringPfc.dto.SolicSenhaDTO;
 import com.web.pfc.SpringPfc.exception.NegocioException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
  
 import java.time.LocalDateTime;
 import java.util.UUID;
  
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SenhaService {
@@ -29,7 +31,8 @@ public class SenhaService {
             token.setToken(UUID.randomUUID().toString());
             token.setExpiraEm(LocalDateTime.now().plusHours(1));
             tokenSenhaRep.save(token);
-            // enviarEmail(usuario.getEmail(), token.getToken()); // implementar depois
+            log.info("[RECUPERACAO DE SENHA] Token para {}: {} (valido por 1 hora)",
+                    usuario.getEmail(), token.getToken());
         });
     }
  

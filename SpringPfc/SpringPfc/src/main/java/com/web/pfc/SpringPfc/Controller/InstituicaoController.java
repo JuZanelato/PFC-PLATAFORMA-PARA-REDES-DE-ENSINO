@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +24,8 @@ import org.springframework.data.domain.ExampleMatcher;
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
 import com.web.pfc.SpringPfc.Service.AuditoriaService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
+import com.web.pfc.SpringPfc.domain.StatusInst;
+import com.web.pfc.SpringPfc.exception.NegocioException;
 import com.web.pfc.SpringPfc.domain.Usuario;
 import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
 
@@ -31,104 +33,104 @@ import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
 @RequestMapping("api/Instituicao")
 public class InstituicaoController {
 
-    private InstituicaoRep instituicaorep;
-    private AuditoriaService auditoriaService;
+        private InstituicaoRep instituicaorep;
+        private AuditoriaService auditoriaService;
 
-    public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService) {
-        this.instituicaorep = instituicaorep;
-        this.auditoriaService = auditoriaService;
-    }
+        public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService) {
+                this.instituicaorep = instituicaorep;
+                this.auditoriaService = auditoriaService;
+        }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
-    public Instituicao save(
-            @RequestBody @Valid Instituicao instituicao,
-            @AuthenticationPrincipal Usuario usuarioLogado) {
+        @PostMapping
+        @ResponseStatus(HttpStatus.CREATED)
+        @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
+        public Instituicao save(
+                        @RequestBody @Valid Instituicao instituicao,
+                        @AuthenticationPrincipal Usuario usuarioLogado) {
 
-        instituicao.setCadastradoPor(usuarioLogado.getEmail());
-        instituicao.setCriadoEm(LocalDateTime.now());
+                instituicao.setCadastradoPor(usuarioLogado.getEmail());
+                instituicao.setCriadoEm(LocalDateTime.now());
 
-        Instituicao salva = instituicaorep.save(instituicao);
-        auditoriaService.registrarCriacaoInstituicao(usuarioLogado, salva.getId());
+                Instituicao salva = instituicaorep.save(instituicao);
+                auditoriaService.registrarCriacaoInstituicao(usuarioLogado, salva.getId());
 
-        return salva;
-    }
+                return salva;
+        }
 
-    @DeleteMapping("{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
+        @PatchMapping("{id}/inativar")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @PreAuthorize("hasRole('ADMINISTRADOR')")
+        public void inativar(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
 
-        instituicaorep.findById(id)
-                .map(instituicao -> {
-                    instituicaorep.delete(instituicao);
-                    auditoriaService.registrarExclusaoInstituicao(usuarioLogado, id);
-                    return Void.TYPE;
-                })
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Registro nao encontrado"
-                ));
-    }
+                Instituicao instituicao = instituicaorep.findById(id)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Registro nao encontrado"));
 
-    @PutMapping("{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
-    public void update(
-            @PathVariable Long id,
-            @RequestBody @Valid Instituicao instituicao,
-            @AuthenticationPrincipal Usuario usuarioLogado) {
+                if (instituicao.getStatus() == StatusInst.INATIVA) {
+                        throw new NegocioException("Instituição já está inativa.");
+                }
 
-        instituicaorep.findById(id)
-                .map(instituicaoExistente -> {
+                instituicao.setStatus(StatusInst.INATIVA);
+                instituicaorep.save(instituicao);
+                auditoriaService.registrarInativacaoInstituicao(usuarioLogado, id);
+        }
 
-                    instituicao.setId(instituicaoExistente.getId());
-                    instituicao.setCadastradoPor(instituicaoExistente.getCadastradoPor());
-                    instituicao.setCriadoEm(instituicaoExistente.getCriadoEm());
+        @PutMapping("{id}")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
+        public void update(
+                        @PathVariable Long id,
+                        @RequestBody @Valid Instituicao instituicao,
+                        @AuthenticationPrincipal Usuario usuarioLogado) {
 
-                    instituicaorep.save(instituicao);
-                    auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
+                instituicaorep.findById(id)
+                                .map(instituicaoExistente -> {
 
-                    return instituicao;
+                                        instituicao.setId(instituicaoExistente.getId());
+                                        instituicao.setCadastradoPor(instituicaoExistente.getCadastradoPor());
+                                        instituicao.setCriadoEm(instituicaoExistente.getCriadoEm());
 
-                })
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Registro nao encontrado"
-                ));
-    }
+                                        instituicaorep.save(instituicao);
+                                        auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
 
-    @GetMapping
-    public List<Instituicao> find(Instituicao filtro) {
+                                        return instituicao;
 
-        ExampleMatcher matcher = ExampleMatcher
-                .matching()
-                .withIgnoreCase()
-                .withStringMatcher(
-                        ExampleMatcher.StringMatcher.CONTAINING
-                );
+                                })
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Registro nao encontrado"));
+        }
 
-        Example<Instituicao> example = Example.of(filtro, matcher);
+        @GetMapping
+        public List<Instituicao> find(Instituicao filtro) {
 
-        return instituicaorep.findAll(example);
-    }
+                ExampleMatcher matcher = ExampleMatcher
+                                .matching()
+                                .withIgnoreCase()
+                                .withStringMatcher(
+                                                ExampleMatcher.StringMatcher.CONTAINING);
 
-    @GetMapping("{id}")
-    public Instituicao getInstituicaoById(
-            @PathVariable("id") Long id) {
+                Example<Instituicao> example = Example.of(filtro, matcher);
 
-        return instituicaorep.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Instituicao nao encontrada"
-                ));
-    }
+                return instituicaorep.findAll(example);
+        }
 
-    @GetMapping("/publicas")
-    public List<InstituicaoResumoDTO> listarPublicas() {
-        return instituicaorep.findAll().stream()
-                .map(i -> new InstituicaoResumoDTO(i.getId(), i.getNome()))
-                .toList();
-    }
+        @GetMapping("{id}")
+        public Instituicao getInstituicaoById(
+                        @PathVariable("id") Long id) {
+
+                return instituicaorep.findById(id)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Instituicao nao encontrada"));
+        }
+
+        @GetMapping("/publicas")
+        public List<InstituicaoResumoDTO> listarPublicas() {
+                return instituicaorep.findAll().stream()
+                                .filter(i -> i.getStatus() != StatusInst.INATIVA)
+                                .map(i -> new InstituicaoResumoDTO(i.getId(), i.getNome()))
+                                .toList();
+        }
 }
