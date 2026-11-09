@@ -10,6 +10,7 @@ import RecuperarSenhaPage from "./Pages/RecuperarSenhaPage";
 import BuscarRecursosPage from "./Pages/BuscarRecursosPage";
 import SolicitacoesPage from "./Pages/SolicitacoesPage";
 import HistoricoPage from "./Pages/HistoricoPage";
+import DashboardPage from "./Pages/DashboardPage";
 
 function App() {
   return (
@@ -67,6 +68,14 @@ function App() {
           element={
             <RotaProtegida>
               <HistoricoPage />
+            </RotaProtegida>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RotaProtegida perfisPermitidos={["GESTOR", "ADMINISTRADOR"]}>
+              <DashboardPage />
             </RotaProtegida>
           }
         />
