@@ -1,0 +1,150 @@
+.sol-abas {
+    display: flex;
+    gap: 0.4rem;
+    border-bottom: 2px solid #f5e6ea;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.sol-abas button {
+    border: none;
+    background: none;
+    padding: 0.6rem 1rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #4b5160;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.sol-abas button.ativa {
+    color: #7a1f3d;
+    font-weight: 600;
+    border-bottom-color: #7a1f3d;
+}
+
+.sol-btn {
+    padding: 0.55rem 1.1rem;
+    border: none;
+    border-radius: 4px;
+    background: #7a1f3d;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.sol-btn:hover {
+    background: #5c1730;
+}
+
+.sol-btn.secundario {
+    background: #e2e2e8;
+    color: #1f2430;
+}
+
+.sol-sucesso {
+    color: #1e824c;
+    background: #e3f6e8;
+    padding: 0.6rem 0.9rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.sol-status {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #eceef2;
+    color: #4b5160;
+    white-space: nowrap;
+}
+
+.sol-status.pendente {
+    background: #fff4d6;
+    color: #9a6b00;
+}
+
+.sol-status.aprovada {
+    background: #e3eefc;
+    color: #1f5fa8;
+}
+
+.sol-status.retirada {
+    background: #efe6fb;
+    color: #6b35a8;
+}
+
+.sol-status.concluida {
+    background: #e3f6e8;
+    color: #1e824c;
+}
+
+.sol-status.recusada {
+    background: #fdecea;
+    color: #c0392b;
+}
+
+.sol-status.cancelada {
+    background: #eceef2;
+    color: #6b7080;
+}
+
+.sol-detalhe {
+    font-size: 0.78rem;
+    color: #6b7080;
+    margin-top: 0.15rem;
+}
+
+.sol-acoes {
+    white-space: nowrap;
+}
+
+.sol-historico-linha td {
+    background: #faf6f7;
+}
+
+.sol-linha-tempo {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.sol-linha-tempo li {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.recurso-form textarea {
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #cfcfd8;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.recurso-form small {
+    color: #6b7080;
+    font-size: 0.75rem;
+}
+
+.recurso-vazio {
+    color: #6b7080;
+    font-style: italic;
+}
+
+@media (max-width: 720px) {
+    .recurso-tabela {
+        display: block;
+        overflow-x: auto;
+    }
+}

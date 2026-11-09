@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useRecurso } from "../Hook/useRecurso";
 import authService from "../Services/authService";
 import { CATEGORIA_OPTIONS, mensagemDeErro } from "../Services/recursoService";
@@ -8,7 +7,6 @@ import RecursoTable from "../Components/RecursoTable";
 import "./RecursosPage.css";
 
 export default function RecursosPage() {
-  const navigate = useNavigate();
   const usuarioLogado = authService.usuarioLogado();
   const podeGerenciar =
     usuarioLogado?.perfil === "ADMINISTRADOR" || usuarioLogado?.perfil === "GESTOR";
@@ -75,19 +73,10 @@ export default function RecursosPage() {
     }
   };
 
-  const handleSair = async () => {
-    try {
-      await authService.logout();
-    } catch {
-      // sessão já expirada no servidor: o token local é limpo mesmo assim
-    }
-    navigate("/login");
-  };
-
   return (
     <div className="recurso-page">
       <header className="recurso-page-header">
-        <h1>Gestão de recursos</h1>
+        <h1>Recursos da minha instituição</h1>
 
         <div className="recurso-page-acoes">
           {podeGerenciar && !mostrarForm && (
@@ -95,14 +84,9 @@ export default function RecursosPage() {
               + Novo recurso
             </button>
           )}
-          <Link to="/instituicoes" className="recurso-link">
-            Minhas instituições
-          </Link>
-          <button type="button" className="secundario" onClick={handleSair}>
-            Sair
-          </button>
         </div>
       </header>
+
 
       {!podeGerenciar && (
         <p className="recurso-aviso">

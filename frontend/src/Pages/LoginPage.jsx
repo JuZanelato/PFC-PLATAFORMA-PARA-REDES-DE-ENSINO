@@ -17,7 +17,7 @@ export default function LoginPage() {
         setEntrando(true);
         try {
             await authService.login(email, senha);
-            navigate("/instituicoes");
+            navigate("/rede");
         } catch (err) {
             setErro(mensagemDeErro(err, "E-mail ou senha inválidos."));
         } finally {

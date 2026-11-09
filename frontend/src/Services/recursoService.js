@@ -23,6 +23,16 @@ const recursoService = {
     return data;
   },
 
+
+  listarRede: async ({ nome, categoria, instituicaoId } = {}) => {
+    const params = {};
+    if (nome?.trim()) params.nome = nome.trim();
+    if (categoria) params.categoria = categoria;
+    if (instituicaoId) params.instituicaoId = instituicaoId;
+    const { data } = await api.get("/recursos/rede", { params });
+    return data;
+  },
+
   buscarPorId: async (id) => {
     const { data } = await api.get(`/recursos/${id}`);
     return data;
