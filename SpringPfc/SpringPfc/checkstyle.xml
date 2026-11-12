@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Regras de estilo do PFC (subconjunto do google_checks).
+  Qualquer violação reprova o build (failOnViolation no pom.xml).
+-->
+<module name="Checker">
+  <property name="charset" value="UTF-8"/>
+  <property name="severity" value="error"/>
+  <property name="fileExtensions" value="java"/>
+
+  <!-- Linhas com no máximo 120 caracteres -->
+  <module name="LineLength">
+    <property name="max" value="120"/>
+    <property name="ignorePattern" value="^(package|import) .*"/>
+  </module>
+
+  <!-- Sem tabulação no código -->
+  <module name="FileTabCharacter"/>
+
+  <module name="TreeWalker">
+    <!-- Imports -->
+    <module name="AvoidStarImport"/>
+    <module name="UnusedImports"/>
+    <module name="RedundantImport"/>
+
+    <!-- Nomes de classes, métodos e variáveis -->
+    <module name="TypeName"/>
+    <module name="MethodName">
+      <!-- underscore liberado para nomes de testes (ex.: metodo_cenario_resultado) -->
+      <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+    </module>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="ParameterName"/>
+
+    <!-- Chaves obrigatórias em if/else/for/while/do -->
+    <module name="NeedBraces"/>
+
+    <!-- Boas práticas simples -->
+    <module name="EmptyStatement"/>
+    <module name="MultipleVariableDeclarations"/>
+    <module name="UpperEll"/>
+  </module>
+</module>
