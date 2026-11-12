@@ -48,7 +48,7 @@ class InstituicaoRepIntegrationTest {
         // Assert
         assertNotNull(salva.getId());
         assertTrue(recuperada.isPresent());
-        assertEquals("Escola Persistência", recuperada.get().getNome());
+        assertEquals("Nome Errado", recuperada.get().getNome());
         assertEquals(StatusInst.ATIVA, recuperada.get().getStatus());
         assertEquals("11222333000144", recuperada.get().getChavePix());
     }
