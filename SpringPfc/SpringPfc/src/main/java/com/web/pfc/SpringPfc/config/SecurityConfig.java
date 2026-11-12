@@ -40,6 +40,8 @@ public class SecurityConfig {
                                 "/api/Instituicao/publicas")
                         .permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Libera a página de erro: sem isso, 400/404 viravam 401 para o cliente
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
