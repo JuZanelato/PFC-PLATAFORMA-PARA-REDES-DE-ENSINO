@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STATUS_OPTIONS } from "../Services/InstituicaoService";
+import { STATUS_OPTIONS } from "../Services/instituicaoService";
 import cepService from "../Services/cepService";
 
 const VAZIO = {
@@ -79,10 +79,10 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
       if (!form.cep?.trim()) novosErros.cep = "CEP é obrigatório";
       else if (form.cep.replace(/\D/g, "").length !== 8)
         novosErros.cep = "CEP deve ter 8 dígitos";
+    }
 
     if (!aceitouTermos) {
-  novosErros.termos = "É necessário concordar com os Termos e a Política de Privacidade";
-}  
+      novosErros.termos = "É necessário concordar com os Termos e a Política de Privacidade";
     }
 
     if (!form.numero?.trim()) novosErros.numero = "Número é obrigatório";
@@ -108,15 +108,12 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
     e.preventDefault();
     if (!validar()) return;
 
-    setForm(VAZIO);
-setEnderecoManual(false);
-setAceitouTermos(false); 
-
     setSalvando(true);
     try {
       await onSalvar(form);
       setForm(VAZIO);
       setEnderecoManual(false);
+      setAceitouTermos(false);
     } catch (err) {
       const mensagem =
         err?.response?.data?.message || "Erro ao salvar instituição.";
@@ -260,19 +257,19 @@ setAceitouTermos(false);
       </label>
 
       <label className="checkbox-termos">
-  <input
-    type="checkbox"
-    checked={aceitouTermos}
-    onChange={(e) => setAceitouTermos(e.target.checked)}
-  />
-  <span>
-    Li e concordo com os{" "}
-    <a href="/politica-privacidade" target="_blank" rel="noopener noreferrer">
-      Termos de Uso e a Política de Privacidade
-    </a>
-  </span>
-</label>
-{erros.termos && <span className="erro-campo">{erros.termos}</span>}
+        <input
+          type="checkbox"
+          checked={aceitouTermos}
+          onChange={(e) => setAceitouTermos(e.target.checked)}
+        />
+        <span>
+          Li e concordo com os{" "}
+          <a href="/politica-privacidade" target="_blank" rel="noopener noreferrer">
+            Termos de Uso e a Política de Privacidade
+          </a>
+        </span>
+      </label>
+      {erros.termos && <span className="erro-campo">{erros.termos}</span>}
 
       <div className="form-acoes">
         <button type="submit" disabled={salvando}>

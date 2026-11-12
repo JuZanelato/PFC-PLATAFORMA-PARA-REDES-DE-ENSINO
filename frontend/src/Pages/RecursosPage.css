@@ -1,0 +1,257 @@
+.recurso-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1f2430;
+}
+
+.recurso-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.recurso-page-header h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.recurso-page-acoes {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.recurso-page-header button {
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 4px;
+  background: #7A1F3D;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.recurso-page-header button:hover {
+  background: #5C1730;
+}
+
+.link-acao {
+  color: #7A1F3D;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.link-acao:hover {
+  color: #5C1730;
+}
+
+.busca-recurso {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #cfcfd8;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.busca-recurso:focus {
+  outline: none;
+  border-color: #7A1F3D;
+  box-shadow: 0 0 0 3px rgba(122, 31, 61, 0.15);
+}
+
+.recurso-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: #f7f7f9;
+  border: 1px solid #e2e2e8;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.recurso-form h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.recurso-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 0.3rem;
+}
+
+.recurso-form input,
+.recurso-form select {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #cfcfd8;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.recurso-form input:focus,
+.recurso-form select:focus {
+  outline: none;
+  border-color: #7A1F3D;
+  box-shadow: 0 0 0 3px rgba(122, 31, 61, 0.15);
+}
+
+.linha-dupla {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.linha-dupla label {
+  flex: 1;
+}
+
+.checkbox-disponivel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.checkbox-disponivel input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.form-acoes {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+.form-acoes button {
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 4px;
+  background: #7A1F3D;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.form-acoes button:hover {
+  background: #5C1730;
+}
+
+.form-acoes button[type="button"] {
+  background: #e2e2e8;
+  color: #1f2430;
+}
+
+.form-acoes button[type="button"]:hover {
+  background: #d5d5dd;
+}
+
+.erro-campo {
+  color: #c0392b;
+  font-size: 0.78rem;
+}
+
+.erro-geral {
+  color: #c0392b;
+  background: #fdecea;
+  padding: 0.6rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.recurso-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.recurso-tabela th,
+.recurso-tabela td {
+  text-align: left;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid #e2e2e8;
+}
+
+.recurso-tabela thead th {
+  background: #F5E6EA;
+  color: #7A1F3D;
+}
+
+.status-badge {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-ativo {
+  background: #e3f6e8;
+  color: #1e824c;
+}
+
+.status-inativo {
+  background: #fbe9e7;
+  color: #b0413e;
+}
+
+.badge-disponibilidade {
+  border: none;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.badge-disponibilidade.disponivel {
+  background: #e3f6e8;
+  color: #1e824c;
+}
+
+.badge-disponibilidade.indisponivel {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.badge-disponibilidade:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.acoes button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-right: 0.7rem;
+  color: #7A1F3D;
+}
+
+.acoes button:hover {
+  text-decoration: underline;
+}
+
+.acoes button:disabled {
+  color: #9aa0ab;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.acoes .btn-perigo {
+  color: #c0392b;
+}
+
+.tabela-vazia {
+  color: #6b7280;
+  font-style: italic;
+}

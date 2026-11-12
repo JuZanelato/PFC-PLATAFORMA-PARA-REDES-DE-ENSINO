@@ -27,7 +27,8 @@ public class AuditoriaController {
 
         Page<LogAuditoriaRespDTO> logs = logAuditoriaRep
                 .findAllByOrderByDataHoraDesc(PageRequest.of(pagina, tamanho))
-                .map(log -> new LogAuditoriaRespDTO(log.getId(), log.getEmailUsuario(), log.getAcao(), log.getDataHora()));
+                .map(log -> new LogAuditoriaRespDTO(log.getId(), log.getEmailUsuario(),
+                        log.getAcao(), log.getDataHora()));
 
         return ResponseEntity.ok(logs);
     }
