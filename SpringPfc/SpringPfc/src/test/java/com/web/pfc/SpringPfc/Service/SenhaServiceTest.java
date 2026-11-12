@@ -64,7 +64,7 @@ class SenhaServiceTest {
         verify(tokenSenhaRep).save(captor.capture());
         TokenRecSenha gerado = captor.getValue();
         assertNotNull(gerado.getToken());
-        assertEquals(null, gerado.getUsuario());
+        assertEquals(usuario, gerado.getUsuario());
         assertTrue(gerado.getExpiraEm().isAfter(antes.plusMinutes(59)));
         assertTrue(gerado.getExpiraEm().isBefore(antes.plusMinutes(61)));
     }
