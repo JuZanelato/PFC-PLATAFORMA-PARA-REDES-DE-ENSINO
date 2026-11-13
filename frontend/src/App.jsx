@@ -7,7 +7,7 @@ import RotaProtegida from "./Components/RotaProtegida";
 import RecursosPage from "./Pages/RecursosPage";
 import PoliticaPrivacidadePage from "./Pages/PoliticaPrivacidadePage";
 import RecuperarSenhaPage from "./Pages/RecuperarSenhaPage";
-import BuscarRecursosPage from "./Pages/BuscarRecursosPage";
+import BuscarRecursosPage from "./Pages/BuscarRecursoPage";
 import SolicitacoesPage from "./Pages/SolicitacoesPage";
 import HistoricoPage from "./Pages/HistoricoPage";
 import DashboardPage from "./Pages/DashboardPage";

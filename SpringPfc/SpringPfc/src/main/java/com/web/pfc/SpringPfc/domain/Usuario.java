@@ -54,6 +54,9 @@ public class Usuario implements UserDetails {
     private boolean ativo = true;
     private LocalDateTime criadoEm;
 
+    @Column(name = "aguardando_aprovacao", columnDefinition = "boolean default false")
+    private boolean aguardandoAprovacao = false;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.name()));
@@ -86,6 +89,6 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return ativo;
+        return ativo && !aguardandoAprovacao;
     }
 }
