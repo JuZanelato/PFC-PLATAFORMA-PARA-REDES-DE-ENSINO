@@ -25,8 +25,11 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAcessoNegado(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Você não tem permissão para executar esta ação.");
+        String mensagem = ex.getMessage();
+        if (mensagem == null || mensagem.isBlank() || mensagem.startsWith("Access Denied")) {
+            mensagem = "Você não tem permissão para executar esta ação.";
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mensagem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
