@@ -21,11 +21,7 @@ public class UsuarioService {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
                 usuario.getInstituicao().getNome());
     }
-
-    public List<UsuarioRespDTO> listarTodos() {
-        return usuarioRep.findAll().stream().map(this::toRespDTO).toList();
-    }
-
+    
         public List<UsuarioRespDTO> listarDaInstituicao(Usuario diretor) {
         return usuarioRep.findByInstituicao_IdOrderByNomeAsc(diretor.getInstituicao().getId())
                 .stream().map(this::toRespDTO).toList();

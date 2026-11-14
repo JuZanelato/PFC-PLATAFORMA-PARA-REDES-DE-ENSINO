@@ -76,25 +76,28 @@ class UsuarioServiceTest {
         verify(auditoriaService, never()).registrarInativacaoUsuario(any(), anyLong());
     }
 
-    @Test
-    void deveListarUsuariosComNomeDaInstituicao() {
+       @Test
+    void deveListarUsuariosDaInstituicaoDoDiretor() {
 
-        when(usuarioRep.findAll()).thenReturn(List.of(usuario(5L, "func@escola.com")));
+        Usuario diretor = usuario(1L, "diretor@escola.com");
+        diretor.getInstituicao().setId(7L);
+        when(usuarioRep.findByInstituicao_IdOrderByNomeAsc(7L)).thenReturn(List.of(usuario(5L, "func@escola.com")));
 
-        List<UsuarioRespDTO> lista = usuarioService.listarTodos();
+        List<UsuarioRespDTO> lista = usuarioService.listarDaInstituicao(diretor);
 
         assertEquals(1, lista.size());
         assertEquals("func@escola.com", lista.get(0).email());
         assertEquals("FUNCIONARIO", lista.get(0).perfil());
         assertEquals("Escola Modelo", lista.get(0).instituicaoNome());
     }
-
-    @Test
+        @Test
     void deveRetornarListaVaziaQuandoNaoHaUsuarios() {
 
-        when(usuarioRep.findAll()).thenReturn(List.of());
+        Usuario diretor = usuario(1L, "diretor@escola.com");
+        diretor.getInstituicao().setId(7L);
+        when(usuarioRep.findByInstituicao_IdOrderByNomeAsc(7L)).thenReturn(List.of());
 
-        List<UsuarioRespDTO> lista = usuarioService.listarTodos();
+        List<UsuarioRespDTO> lista = usuarioService.listarDaInstituicao(diretor);
 
         assertTrue(lista.isEmpty());
     }
