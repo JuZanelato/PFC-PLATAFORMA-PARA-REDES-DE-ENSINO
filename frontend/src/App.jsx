@@ -11,6 +11,7 @@ import BuscarRecursosPage from "./Pages/BuscarRecursoPage";
 import SolicitacoesPage from "./Pages/SolicitacoesPage";
 import HistoricoPage from "./Pages/HistoricoPage";
 import DashboardPage from "./Pages/DashboardPage";
+import UsuariosPage from "./Pages/UsuariosPage";
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
           element={
             <RotaProtegida perfisPermitidos={["ADMINISTRADOR"]}>
               <AuditoriaPage />
+            </RotaProtegida>
+          }
+        />
+        <Route
+          path="/usuarios"
+          element={
+            <RotaProtegida perfisPermitidos={["ADMINISTRADOR"]}>
+              <UsuariosPage />
             </RotaProtegida>
           }
         />
