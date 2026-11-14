@@ -14,7 +14,7 @@ const VAZIO = {
   chavePix: "",
 };
 
-export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCancelar }) {
+export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCancelar, esconderStatus = false }) {
   const [form, setForm] = useState(VAZIO);
   const [erros, setErros] = useState({});
   const [salvando, setSalvando] = useState(false);
@@ -245,16 +245,18 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
         {erros.email && <span className="erro-campo">{erros.email}</span>}
       </label>
 
-      <label>
-        Status
-        <select value={form.status} onChange={handleChange("status")}>
-          {STATUS_OPTIONS.map((opcao) => (
-            <option key={opcao.value} value={opcao.value}>
-              {opcao.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {!esconderStatus && (
+        <label>
+          Status
+          <select value={form.status} onChange={handleChange("status")}>
+            {STATUS_OPTIONS.map((opcao) => (
+              <option key={opcao.value} value={opcao.value}>
+                {opcao.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {!form.id && (
         <>

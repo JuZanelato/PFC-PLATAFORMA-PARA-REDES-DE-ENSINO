@@ -43,19 +43,29 @@ public class InstituicaoController {
 
         @PostMapping
         @ResponseStatus(HttpStatus.CREATED)
-        @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
         public Instituicao save(
                         @RequestBody @Valid Instituicao instituicao,
                         @AuthenticationPrincipal Usuario usuarioLogado) {
 
-                instituicao.setCadastradoPor(usuarioLogado.getEmail());
+                String cnpj = instituicao.getCnpj().replaceAll("\\D", "");
+                if (instituicaorep.existsByCnpj(cnpj)) {
+                        throw new NegocioException("Já existe uma instituição cadastrada com este CNPJ.");
+                }
+
+                String responsavel = (usuarioLogado != null) ? usuarioLogado.getEmail() : "autocadastro";
+
+                instituicao.setId(null);
+                instituicao.setCnpj(cnpj);
+                instituicao.setStatus(StatusInst.ATIVA);
+                instituicao.setCadastradoPor(responsavel);
                 instituicao.setCriadoEm(LocalDateTime.now());
 
                 Instituicao salva = instituicaorep.save(instituicao);
-                auditoriaService.registrarCriacaoInstituicao(usuarioLogado, salva.getId());
+                auditoriaService.registrarCriacaoInstituicao(responsavel, salva.getId());
 
                 return salva;
         }
+
 
         @PatchMapping("{id}/inativar")
         @ResponseStatus(HttpStatus.NO_CONTENT)

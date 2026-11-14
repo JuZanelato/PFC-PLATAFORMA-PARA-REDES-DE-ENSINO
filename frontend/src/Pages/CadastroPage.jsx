@@ -3,12 +3,20 @@ import { useNavigate, Link } from "react-router-dom";
 import authService from "../Services/authService";
 import instituicaoService from "../Services/instituicaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
+import { PERFIL_LABEL } from "../Services/usuarioService";
+import InstituicaoForm from "../Components/InstituicaoForm";
+import "./InstituicoesPages.css";
 import "./CadastroPage.css";
 
-const PERFIL_OPTIONS = [
+const CARGOS_AUTOCADASTRO = [
   { value: "FUNCIONARIO", label: "Funcionário" },
-  { value: "GESTOR", label: "Gestor" },
-  { value: "ADMINISTRADOR", label: "Administrador" },
+  { value: "GESTOR", label: "Gestor (coordenador)" },
+  { value: "ADMINISTRADOR", label: "Diretor" },
+];
+
+const CARGOS_DIRETOR = [
+  { value: "FUNCIONARIO", label: "Funcionário" },
+  { value: "GESTOR", label: "Gestor (coordenador)" },
 ];
 
 const VAZIO = {
@@ -16,27 +24,65 @@ const VAZIO = {
   email: "",
   senha: "",
   confirmarSenha: "",
-  instituicaoId: "",
   perfil: "FUNCIONARIO",
 };
 
 export default function CadastroPage() {
+  const navigate = useNavigate();
+  const usuarioLogado = authService.usuarioLogado();
+  const diretorLogado = usuarioLogado?.perfil === "ADMINISTRADOR";
+  const outroPerfilLogado = !!usuarioLogado && !diretorLogado;
+
   const [form, setForm] = useState(VAZIO);
   const [instituicoes, setInstituicoes] = useState([]);
+  const [busca, setBusca] = useState("");
+  const [instituicaoEscolhida, setInstituicaoEscolhida] = useState(null);
+  const [mostrarFormInstituicao, setMostrarFormInstituicao] = useState(false);
+  const [aviso, setAviso] = useState("");
   const [erros, setErros] = useState({});
   const [cadastrando, setCadastrando] = useState(false);
   const [aceitouTermos, setAceitouTermos] = useState(false);
-  const navigate = useNavigate();
+  const [cadastroPendente, setCadastroPendente] = useState(false);
 
   useEffect(() => {
+    if (diretorLogado) return;
     instituicaoService
       .listarPublicas()
       .then(setInstituicoes)
       .catch(() => setErros((prev) => ({ ...prev, geral: "Não foi possível carregar as instituições." })));
-  }, []);
+  }, [diretorLogado]);
+
+  const termo = busca.trim().toLowerCase();
+  const sugestoes =
+    !instituicaoEscolhida && termo
+      ? instituicoes.filter((inst) => inst.nome.toLowerCase().includes(termo)).slice(0, 6)
+      : [];
+  const naoEncontrada = !instituicaoEscolhida && termo.length >= 3 && sugestoes.length === 0;
+  const cargos = diretorLogado ? CARGOS_DIRETOR : CARGOS_AUTOCADASTRO;
 
   const handleChange = (campo) => (e) => {
     setForm((prev) => ({ ...prev, [campo]: e.target.value }));
+  };
+
+  const handleBusca = (e) => {
+    setBusca(e.target.value);
+    setInstituicaoEscolhida(null);
+    setAviso("");
+  };
+
+  const escolherInstituicao = (inst) => {
+    setInstituicaoEscolhida(inst);
+    setBusca(inst.nome);
+    setErros((prev) => ({ ...prev, instituicao: undefined }));
+  };
+
+  const salvarInstituicao = async (dados) => {
+    const nova = await instituicaoService.criar(dados);
+    const resumo = { id: nova.id, nome: nova.nome };
+    setInstituicoes((prev) => [...prev, resumo]);
+    escolherInstituicao(resumo);
+    setMostrarFormInstituicao(false);
+    setAviso(`A instituição "${nova.nome}" foi cadastrada. Agora conclua o seu cadastro como Diretor.`);
   };
 
   const validar = () => {
@@ -48,8 +94,9 @@ export default function CadastroPage() {
     if (!form.senha) novosErros.senha = "Senha é obrigatória";
     else if (form.senha.length < 6) novosErros.senha = "Senha deve ter ao menos 6 caracteres";
     if (form.senha !== form.confirmarSenha) novosErros.confirmarSenha = "As senhas não coincidem";
-    if (!form.instituicaoId) novosErros.instituicaoId = "Selecione uma instituição";
-    if (!aceitouTermos)
+    if (!diretorLogado && !instituicaoEscolhida)
+      novosErros.instituicao = "Digite o nome da escola e selecione na lista";
+    if (!diretorLogado && !aceitouTermos)
       novosErros.termos = "É necessário concordar com os Termos e a Política de Privacidade";
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
@@ -65,10 +112,17 @@ export default function CadastroPage() {
         nome: form.nome,
         email: form.email,
         senha: form.senha,
-        instituicaoId: Number(form.instituicaoId),
+        instituicaoId: diretorLogado ? null : instituicaoEscolhida.id,
         perfil: form.perfil,
       });
-      navigate("/login");
+
+      if (diretorLogado) {
+        navigate("/usuarios");
+      } else if (form.perfil === "GESTOR") {
+        setCadastroPendente(true);
+      } else {
+        navigate("/login");
+      }
     } catch (err) {
       setErros({ geral: mensagemDeErro(err, "Erro ao cadastrar usuário.") });
     } finally {
@@ -76,12 +130,60 @@ export default function CadastroPage() {
     }
   };
 
+  if (outroPerfilLogado) {
+    return (
+      <div className="cadastro-page">
+        <div className="cadastro-form">
+          <h1>Cadastrar usuário</h1>
+          <p className="cad-aviso">
+            Você está logado como {PERFIL_LABEL[usuarioLogado.perfil] || usuarioLogado.perfil}. Apenas o diretor
+            da escola pode cadastrar novos usuários.
+          </p>
+          <Link to="/rede">Voltar ao sistema</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (cadastroPendente) {
+    return (
+      <div className="cadastro-page">
+        <div className="cadastro-form">
+          <h1>Cadastro enviado</h1>
+          <p className="cad-sucesso">
+            Sua conta de Gestor foi criada e está aguardando a aprovação do diretor da{" "}
+            <strong>{instituicaoEscolhida?.nome}</strong>. Assim que ele aprovar, você poderá entrar no sistema.
+          </p>
+          <Link to="/login">Ir para o login</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (mostrarFormInstituicao) {
+    return (
+      <div className="cadastro-page">
+        <div className="cad-instituicao">
+          <h1>Cadastrar instituição</h1>
+          <p className="cad-dica">
+            Preencha os dados da sua escola. Depois de salvar, você volta para concluir o seu cadastro como Diretor.
+          </p>
+          <InstituicaoForm onSalvar={salvarInstituicao} esconderStatus />
+          <button type="button" className="cad-voltar" onClick={() => setMostrarFormInstituicao(false)}>
+            ← Voltar ao cadastro
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cadastro-page">
       <form className="cadastro-form" onSubmit={handleSubmit}>
-        <h1>Criar conta</h1>
+        <h1>{diretorLogado ? "Cadastrar usuário" : "Criar conta"}</h1>
 
         {erros.geral && <p className="erro-geral">{erros.geral}</p>}
+        {aviso && <p className="cad-sucesso">{aviso}</p>}
 
         <label>
           Nome
@@ -108,51 +210,100 @@ export default function CadastroPage() {
         </label>
 
         <label>
-          Instituição
-          <select value={form.instituicaoId} onChange={handleChange("instituicaoId")}>
-            <option value="">Selecione...</option>
-            {instituicoes.map((inst) => (
-              <option key={inst.id} value={inst.id}>
-                {inst.nome}
-              </option>
-            ))}
-          </select>
-          {erros.instituicaoId && <span className="erro-campo">{erros.instituicaoId}</span>}
-        </label>
-
-        <label>
-          Perfil
+          Cargo na escola
           <select value={form.perfil} onChange={handleChange("perfil")}>
-            {PERFIL_OPTIONS.map((opcao) => (
+            {cargos.map((opcao) => (
               <option key={opcao.value} value={opcao.value}>
                 {opcao.label}
               </option>
             ))}
           </select>
+          {!diretorLogado && form.perfil === "GESTOR" && (
+            <span className="cad-dica">Contas de Gestor precisam ser aprovadas pelo diretor da escola.</span>
+          )}
         </label>
 
-        <label className="cadastro-termos">
-          <span>
-            <input
-              type="checkbox"
-              checked={aceitouTermos}
-              onChange={(e) => setAceitouTermos(e.target.checked)}
-            />{" "}
-            Li e concordo com os{" "}
-            <Link to="/politica-privacidade" target="_blank" rel="noopener noreferrer">
-              Termos de Uso e a Política de Privacidade
-            </Link>
-          </span>
-          {erros.termos && <span className="erro-campo">{erros.termos}</span>}
-        </label>
+        {diretorLogado ? (
+          <p className="cad-info">
+            Instituição: <strong>{usuarioLogado.instituicaoNome}</strong>
+          </p>
+        ) : (
+          <div className="cad-campo-instituicao">
+            <label>
+              Instituição
+              <input
+                type="text"
+                value={busca}
+                onChange={handleBusca}
+                placeholder="Digite o nome da escola"
+                autoComplete="off"
+              />
+            </label>
+
+            {instituicaoEscolhida && <span className="cad-selecionada">✓ Instituição selecionada</span>}
+
+            {sugestoes.length > 0 && (
+              <ul className="cad-sugestoes">
+                {sugestoes.map((inst) => (
+                  <li key={inst.id}>
+                    <button type="button" onClick={() => escolherInstituicao(inst)}>
+                      {inst.nome}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {naoEncontrada && (
+              <div className="cad-aviso">
+                <strong>Instituição não cadastrada.</strong>
+                {form.perfil === "ADMINISTRADOR" ? (
+                  <>
+                    <span>Para continuar, cadastre a instituição.</span>
+                    <button type="button" onClick={() => setMostrarFormInstituicao(true)}>
+                      Cadastrar instituição
+                    </button>
+                  </>
+                ) : (
+                  <span>Peça ao diretor da sua escola para cadastrá-la primeiro.</span>
+                )}
+              </div>
+            )}
+
+            {erros.instituicao && <span className="erro-campo">{erros.instituicao}</span>}
+          </div>
+        )}
+
+        {!diretorLogado && (
+          <label className="cadastro-termos">
+            <span>
+              <input
+                type="checkbox"
+                checked={aceitouTermos}
+                onChange={(e) => setAceitouTermos(e.target.checked)}
+              />{" "}
+              Li e concordo com os{" "}
+              <Link to="/politica-privacidade" target="_blank" rel="noopener noreferrer">
+                Termos de Uso e a Política de Privacidade
+              </Link>
+            </span>
+            {erros.termos && <span className="erro-campo">{erros.termos}</span>}
+          </label>
+        )}
 
         <button type="submit" disabled={cadastrando}>
           {cadastrando ? "Cadastrando..." : "Cadastrar"}
         </button>
 
-        <p>
-          Já tem conta? <Link to="/login">Entrar</Link>
-        </p>
+        {diretorLogado ? (
+          <p>
+            <Link to="/usuarios">← Voltar para usuários</Link>
+          </p>
+        ) : (
+          <p>
+            Já tem conta? <Link to="/login">Entrar</Link>
+          </p>
+        )}
       </form>
     </div>
   );

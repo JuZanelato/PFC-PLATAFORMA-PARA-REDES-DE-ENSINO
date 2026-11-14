@@ -1,25 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import authService from "../Services/authService";
+import { PERFIL_LABEL } from "../Services/usuarioService";
 import "./Navegacao.css";
-
-const PERFIL_LABEL = {
-    FUNCIONARIO: "Funcionário",
-    GESTOR: "Gestor",
-    ADMINISTRADOR: "Administrador",
-};
-
 
 export default function Navegacao() {
     const navigate = useNavigate();
     const usuario = authService.usuarioLogado();
     const perfil = usuario?.perfil;
-    const ehGestorOuAdmin = perfil === "GESTOR" || perfil === "ADMINISTRADOR";
+    const ehDiretor = perfil === "ADMINISTRADOR";
+    const ehGestorOuDiretor = perfil === "GESTOR" || perfil === "ADMINISTRADOR";
 
     const handleSair = async () => {
         try {
             await authService.logout();
         } catch {
-
+            // mesmo se o back-end não responder, a sessão local já foi limpa
         }
         navigate("/login");
     };
@@ -31,7 +26,7 @@ export default function Navegacao() {
             <span className="nav-marca">CompartilhaEdu</span>
 
             <div className="nav-links">
-                {ehGestorOuAdmin && (
+                {ehGestorOuDiretor && (
                     <NavLink to="/dashboard" className={classe}>
                         Dashboard
                     </NavLink>
@@ -51,7 +46,12 @@ export default function Navegacao() {
                 <NavLink to="/instituicoes" className={classe}>
                     Instituições
                 </NavLink>
-                {perfil === "ADMINISTRADOR" && (
+                {ehDiretor && (
+                    <NavLink to="/usuarios" className={classe}>
+                        Usuários
+                    </NavLink>
+                )}
+                {ehDiretor && (
                     <NavLink to="/auditoria" className={classe}>
                         Auditoria
                     </NavLink>
