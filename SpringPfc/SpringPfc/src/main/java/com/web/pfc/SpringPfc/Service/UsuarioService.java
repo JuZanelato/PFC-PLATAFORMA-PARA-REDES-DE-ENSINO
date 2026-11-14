@@ -17,9 +17,9 @@ public class UsuarioService {
     private final UsuarioRep usuarioRep;
     private final AuditoriaService auditoriaService;
 
-    public UsuarioRespDTO toRespDTO(Usuario usuario) {
+        public UsuarioRespDTO toRespDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
-                usuario.getInstituicao().getNome());
+                usuario.getInstituicao().getNome(), usuario.isAtivo(), usuario.isAguardandoAprovacao());
     }
     
         public List<UsuarioRespDTO> listarDaInstituicao(Usuario diretor) {

@@ -151,8 +151,9 @@ public class AuthService {
         }
     }
 
-    private UsuarioRespDTO toDTO(Usuario usuario) {
+        private UsuarioRespDTO toDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(),
-                usuario.getPerfil().name(), usuario.getInstituicao().getNome());
+                usuario.getPerfil().name(), usuario.getInstituicao().getNome(),
+                usuario.isAtivo(), usuario.isAguardandoAprovacao());
     }
 }   

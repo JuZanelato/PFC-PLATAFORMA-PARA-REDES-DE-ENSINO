@@ -1,4 +1,4 @@
 package com.web.pfc.SpringPfc.dto;
 
-public record UsuarioRespDTO(Long id, String nome, String email, String perfil, String instituicaoNome) {
-}
+public record UsuarioRespDTO(Long id, String nome, String email, String perfil, String instituicaoNome,
+        boolean ativo, boolean aguardandoAprovacao){}
