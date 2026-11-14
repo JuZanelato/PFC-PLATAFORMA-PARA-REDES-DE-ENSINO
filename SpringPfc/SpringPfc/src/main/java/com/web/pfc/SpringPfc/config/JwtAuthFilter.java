@@ -32,11 +32,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             if (jwtUtil.tokenValido(token)) {
                 String email = jwtUtil.extrairEmail(token);
-                usuarioRepo.findByEmail(email).ifPresent(usuario -> {
-                    var authToken = new UsernamePasswordAuthenticationToken(
-                            usuario, null, usuario.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                });
+                usuarioRepo.findByEmail(email)
+                        .filter(usuario -> usuario.isEnabled() && usuario.isAccountNonLocked())
+                        .ifPresent(usuario -> {
+                            var authToken = new UsernamePasswordAuthenticationToken(
+                                    usuario, null, usuario.getAuthorities());
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                        });
             }
         }
         filterChain.doFilter(request, response);
