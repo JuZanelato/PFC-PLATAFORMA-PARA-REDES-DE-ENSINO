@@ -30,6 +30,10 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "INSTITUICAO_CRIADA:" + instituicaoId);
     }
 
+        public void registrarCriacaoInstituicao(String responsavel, Long instituicaoId) {
+        salvar(responsavel, "INSTITUICAO_CRIADA:" + instituicaoId);
+    }
+
     public void registrarAlteracaoInstituicao(Usuario usuario, Long instituicaoId) {
         salvar(usuario.getEmail(), "INSTITUICAO_ALTERADA:" + instituicaoId);
     }
@@ -40,6 +44,14 @@ public class AuditoriaService {
 
     public void registrarInativacaoInstituicao(Usuario usuario, Long instituicaoId) {
         salvar(usuario.getEmail(), "INSTITUICAO_INATIVADA:" + instituicaoId);
+    }
+
+        public void registrarAprovacaoUsuario(Usuario diretor, Long usuarioId) {
+        salvar(diretor.getEmail(), "USUARIO_APROVADO:" + usuarioId);
+    }
+
+    public void registrarRecusaUsuario(Usuario diretor, Long usuarioId) {
+        salvar(diretor.getEmail(), "USUARIO_RECUSADO:" + usuarioId);
     }
 
     public void registrarAlteracaoPix(Usuario usuario, Long instituicaoId) {
