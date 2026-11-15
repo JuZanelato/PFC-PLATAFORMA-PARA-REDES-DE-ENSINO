@@ -2,32 +2,33 @@ package com.web.pfc.SpringPfc.Controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import jakarta.validation.Valid;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
 import com.web.pfc.SpringPfc.Service.AuditoriaService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
+import com.web.pfc.SpringPfc.domain.Perfil;
 import com.web.pfc.SpringPfc.domain.StatusInst;
-import com.web.pfc.SpringPfc.exception.NegocioException;
 import com.web.pfc.SpringPfc.domain.Usuario;
+import com.web.pfc.SpringPfc.dto.InstituicaoRedeDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
+import com.web.pfc.SpringPfc.exception.NegocioException;
 
 @RestController
 @RequestMapping("api/Instituicao")
@@ -46,6 +47,10 @@ public class InstituicaoController {
         public Instituicao save(
                         @RequestBody @Valid Instituicao instituicao,
                         @AuthenticationPrincipal Usuario usuarioLogado) {
+
+                if (usuarioLogado != null && usuarioLogado.getPerfil() != Perfil.ADMINISTRADOR) {
+                        throw new AccessDeniedException("Apenas o diretor pode cadastrar instituições.");
+                }
 
                 String cnpj = instituicao.getCnpj().replaceAll("\\D", "");
                 if (instituicaorep.existsByCnpj(cnpj)) {
@@ -67,74 +72,58 @@ public class InstituicaoController {
         }
 
 
-        @PatchMapping("{id}/inativar")
-        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @GetMapping("/minha")
         @PreAuthorize("hasRole('ADMINISTRADOR')")
-        public void inativar(@PathVariable("id") Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
-
-                Instituicao instituicao = instituicaorep.findById(id)
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Registro nao encontrado"));
-
-                if (instituicao.getStatus() == StatusInst.INATIVA) {
-                        throw new NegocioException("Instituição já está inativa.");
-                }
-
-                instituicao.setStatus(StatusInst.INATIVA);
-                instituicaorep.save(instituicao);
-                auditoriaService.registrarInativacaoInstituicao(usuarioLogado, id);
+        public Instituicao minha(@AuthenticationPrincipal Usuario usuarioLogado) {
+                return buscarOuFalhar(usuarioLogado.getInstituicao().getId());
         }
 
+
+        @GetMapping("{id}")
+        @PreAuthorize("hasRole('ADMINISTRADOR')")
+        public Instituicao getInstituicaoById(
+                        @PathVariable("id") Long id,
+                        @AuthenticationPrincipal Usuario usuarioLogado) {
+                validarPropriaInstituicao(id, usuarioLogado);
+                return buscarOuFalhar(id);
+        }
+
+        
         @PutMapping("{id}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
-        @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
+        @PreAuthorize("hasRole('ADMINISTRADOR')")
         public void update(
                         @PathVariable Long id,
                         @RequestBody @Valid Instituicao instituicao,
                         @AuthenticationPrincipal Usuario usuarioLogado) {
 
-                instituicaorep.findById(id)
-                                .map(instituicaoExistente -> {
+                validarPropriaInstituicao(id, usuarioLogado);
+                Instituicao existente = buscarOuFalhar(id);
 
-                                        instituicao.setId(instituicaoExistente.getId());
-                                        instituicao.setCadastradoPor(instituicaoExistente.getCadastradoPor());
-                                        instituicao.setCriadoEm(instituicaoExistente.getCriadoEm());
+                String cnpj = instituicao.getCnpj().replaceAll("\\D", "");
+                if (!cnpj.equals(existente.getCnpj()) && instituicaorep.existsByCnpj(cnpj)) {
+                        throw new NegocioException("Já existe uma instituição cadastrada com este CNPJ.");
+                }
 
-                                        instituicaorep.save(instituicao);
-                                        auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
+                instituicao.setId(existente.getId());
+                instituicao.setCnpj(cnpj);
+                instituicao.setStatus(existente.getStatus());
+                instituicao.setCadastradoPor(existente.getCadastradoPor());
+                instituicao.setCriadoEm(existente.getCriadoEm());
 
-                                        return instituicao;
-
-                                })
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Registro nao encontrado"));
+                instituicaorep.save(instituicao);
+                auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
         }
 
-        @GetMapping
-        public List<Instituicao> find(Instituicao filtro) {
 
-                ExampleMatcher matcher = ExampleMatcher
-                                .matching()
-                                .withIgnoreCase()
-                                .withStringMatcher(
-                                                ExampleMatcher.StringMatcher.CONTAINING);
-
-                Example<Instituicao> example = Example.of(filtro, matcher);
-
-                return instituicaorep.findAll(example);
+        @GetMapping("/rede")
+        public List<InstituicaoRedeDTO> listarRede() {
+                return instituicaorep.findAll().stream()
+                                .filter(i -> i.getStatus() != StatusInst.INATIVA)
+                                .map(i -> new InstituicaoRedeDTO(i.getId(), i.getNome(), i.getEndereco(), i.getEmail()))
+                                .toList();
         }
 
-        @GetMapping("{id}")
-        public Instituicao getInstituicaoById(
-                        @PathVariable("id") Long id) {
-
-                return instituicaorep.findById(id)
-                                .orElseThrow(() -> new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Instituicao nao encontrada"));
-        }
 
         @GetMapping("/publicas")
         public List<InstituicaoResumoDTO> listarPublicas() {
@@ -142,5 +131,18 @@ public class InstituicaoController {
                                 .filter(i -> i.getStatus() != StatusInst.INATIVA)
                                 .map(i -> new InstituicaoResumoDTO(i.getId(), i.getNome()))
                                 .toList();
+        }
+
+        private Instituicao buscarOuFalhar(Long id) {
+                return instituicaorep.findById(id)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Instituição não encontrada"));
+        }
+
+        private void validarPropriaInstituicao(Long id, Usuario usuarioLogado) {
+                if (!Objects.equals(id, usuarioLogado.getInstituicao().getId())) {
+                        throw new AccessDeniedException("Você só pode acessar os dados da sua instituição.");
+                }
         }
 }

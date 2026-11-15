@@ -6,13 +6,18 @@ export const STATUS_OPTIONS = [
 ];
 
 const instituicaoService = {
-  listar: async (filtro = {}) => {
-    const { data } = await api.get("/Instituicao", { params: filtro });
+  minha: async () => {
+    const { data } = await api.get("/Instituicao/minha");
     return data;
   },
 
-  buscarPorId: async (id) => {
-    const { data } = await api.get(`/Instituicao/${id}`);
+  listarRede: async () => {
+    const { data } = await api.get("/Instituicao/rede");
+    return data;
+  },
+
+  listarPublicas: async () => {
+    const { data } = await api.get("/Instituicao/publicas");
     return data;
   },
 
@@ -21,17 +26,8 @@ const instituicaoService = {
     return data;
   },
 
-  listarPublicas: async () => {
-    const { data } = await api.get("/Instituicao/publicas");
-    return data;
-},
-
   atualizar: async (id, instituicao) => {
     await api.put(`/Instituicao/${id}`, instituicao);
-  },
-
-  inativar: async (id) => {
-    await api.patch(`/Instituicao/${id}/inativar`);
   },
 };
 

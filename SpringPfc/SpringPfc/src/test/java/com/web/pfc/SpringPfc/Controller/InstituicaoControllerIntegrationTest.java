@@ -2,7 +2,7 @@ package com.web.pfc.SpringPfc.Controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -117,45 +117,76 @@ class InstituicaoControllerIntegrationTest {
     }
 
     @Test
-    void deveRetornar403ComMensagemQuandoFuncionarioTentaInativar() throws Exception {
+    void deveCriarInstituicaoSemLoginNoCadastroDoDiretor() throws Exception {
+
+        mockMvc.perform(post(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JSON_VALIDO))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.cadastradoPor").value("autocadastro"))
+                .andExpect(jsonPath("$.status").value("ATIVA"));
+    }
+
+    @Test
+    void deveRetornar403QuandoFuncionarioTentaCadastrarInstituicao() throws Exception {
 
         String tokenFuncionario = tokenDe(Perfil.FUNCIONARIO, "func@integracao.com");
 
-        mockMvc.perform(patch(URL + "/" + instituicaoBase.getId() + "/inativar")
-                .header("Authorization", tokenFuncionario))
+        mockMvc.perform(post(URL)
+                .header("Authorization", tokenFuncionario)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JSON_VALIDO))
                 .andExpect(status().isForbidden())
-                .andExpect(content().string("Você não tem permissão para executar esta ação."));
+                .andExpect(content().string("Apenas o diretor pode cadastrar instituições."));
 
-        assertEquals(StatusInst.ATIVA, instituicaoRep.findById(instituicaoBase.getId()).orElseThrow().getStatus());
+        assertFalse(instituicaoRep.existsByCnpj("12345678000199"));
     }
 
     @Test
-    void deveCriarInstituicaoEDepoisConsultarPorId() throws Exception {
+    void deveRetornarOsDadosDaPropriaInstituicaoParaODiretor() throws Exception {
 
-        String token = tokenDe(Perfil.GESTOR, "gestor@integracao.com");
+        String token = tokenDe(Perfil.ADMINISTRADOR, "diretor@integracao.com");
 
-        Long id = criarInstituicaoViaApi(token);
-
-        mockMvc.perform(get(URL + "/" + id).header("Authorization", token))
+        mockMvc.perform(get(URL + "/minha").header("Authorization", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.cnpj").value("12345678000199"))
-                .andExpect(jsonPath("$.chavePix").value("contato@integracao.edu.br"));
-        assertEquals("Escola Estadual Integração", instituicaoRep.findById(id).orElseThrow().getNome());
+                .andExpect(jsonPath("$.id").value(instituicaoBase.getId()))
+                .andExpect(jsonPath("$.cnpj").value("98765432000111"));
     }
 
     @Test
-    void deveInativarInstituicaoSemApagarDoBanco() throws Exception {
+    void deveNegarAoDiretorOsDadosDeOutraInstituicao() throws Exception {
 
-        String token = tokenDe(Perfil.ADMINISTRADOR, "admin2@integracao.com");
-        Long id = criarInstituicaoViaApi(token);
+        String token = tokenDe(Perfil.ADMINISTRADOR, "diretor2@integracao.com");
+        Long outraId = criarInstituicaoViaApi(token);
 
-        mockMvc.perform(patch(URL + "/" + id + "/inativar").header("Authorization", token))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(get(URL + "/" + outraId).header("Authorization", token))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string("Você só pode acessar os dados da sua instituição."));
+    }
 
-        mockMvc.perform(get(URL + "/" + id).header("Authorization", token))
+    @Test
+    void deveRetornar403QuandoGestorTentaEditarInstituicao() throws Exception {
+
+        String tokenGestor = tokenDe(Perfil.GESTOR, "gestor@integracao.com");
+
+        mockMvc.perform(put(URL + "/" + instituicaoBase.getId())
+                .header("Authorization", tokenGestor)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(JSON_VALIDO))
+                .andExpect(status().isForbidden());
+
+        assertEquals("Instituição Base", instituicaoRep.findById(instituicaoBase.getId()).orElseThrow().getNome());
+    }
+
+    @Test
+    void deveListarARedeSemDadosSensiveis() throws Exception {
+
+        String tokenFuncionario = tokenDe(Perfil.FUNCIONARIO, "func2@integracao.com");
+
+        mockMvc.perform(get(URL + "/rede").header("Authorization", tokenFuncionario))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("INATIVA"));
-        assertEquals(StatusInst.INATIVA, instituicaoRep.findById(id).orElseThrow().getStatus());
+                .andExpect(jsonPath("$[?(@.nome == 'Instituição Base')]").exists())
+                .andExpect(jsonPath("$[0].cnpj").doesNotExist())
+                .andExpect(jsonPath("$[0].chavePix").doesNotExist());
     }
 }
