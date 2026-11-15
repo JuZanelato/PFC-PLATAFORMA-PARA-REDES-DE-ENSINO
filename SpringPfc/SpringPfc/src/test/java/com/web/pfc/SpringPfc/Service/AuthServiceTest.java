@@ -1,6 +1,8 @@
 package com.web.pfc.SpringPfc.Service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -15,8 +17,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -61,6 +65,7 @@ class AuthServiceTest {
     private void prepararCadastroValido() {
         when(usuarioRep.existsByEmail("ana@escola.com")).thenReturn(false);
         when(instituicaoRep.findById(1L)).thenReturn(Optional.of(instituicao()));
+        when(usuarioRep.existsByInstituicao_IdAndPerfilAndAtivoTrue(1L, Perfil.ADMINISTRADOR)).thenReturn(true);
         when(passwordEncoder.encode("senha123")).thenReturn("HASH_BCRYPT");
         when(usuarioRep.save(any(Usuario.class))).thenAnswer(i -> {
             Usuario u = i.getArgument(0);
@@ -82,6 +87,7 @@ class AuthServiceTest {
         Usuario salvo = captor.getValue();
         assertEquals("HASH_BCRYPT", salvo.getSenhaHash());
         assertEquals(Perfil.GESTOR, salvo.getPerfil());
+        assertTrue(salvo.isAguardandoAprovacao());
         assertEquals(10L, resposta.id());
         assertEquals("Escola Modelo", resposta.instituicaoNome());
     }
@@ -166,5 +172,95 @@ class AuthServiceTest {
         assertEquals("E-mail ou senha inválidos.", ex.getMessage());
         verify(auditoriaService).registrarTentativaLogin("ana@escola.com", false);
         verify(jwtUtil, never()).gerarToken(any());
+    }
+
+    @Test
+    void deveCadastrarFuncionarioAtivoNoAutocadastro() {
+        prepararCadastroValido();
+        CadUsuarioDTO dto = new CadUsuarioDTO("Ana", "ana@escola.com", "senha123", 1L, "FUNCIONARIO");
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+
+        authService.cadastrar(dto, null);
+
+        verify(usuarioRep).save(captor.capture());
+        assertFalse(captor.getValue().isAguardandoAprovacao());
+        assertTrue(captor.getValue().isEnabled());
+    }
+
+    @Test
+    void deveRecusarSegundoDiretorNaMesmaInstituicao() {
+        when(usuarioRep.existsByEmail("ana@escola.com")).thenReturn(false);
+        when(instituicaoRep.findById(1L)).thenReturn(Optional.of(instituicao()));
+        when(usuarioRep.existsByInstituicao_IdAndPerfilAndAtivoTrue(1L, Perfil.ADMINISTRADOR)).thenReturn(true);
+        CadUsuarioDTO dto = new CadUsuarioDTO("Ana", "ana@escola.com", "senha123", 1L, "ADMINISTRADOR");
+
+        NegocioException ex = assertThrows(NegocioException.class, () -> authService.cadastrar(dto, null));
+
+        assertEquals("Esta instituição já possui um diretor cadastrado.", ex.getMessage());
+        verify(usuarioRep, never()).save(any());
+    }
+
+    @Test
+    void deveNegarCadastroFeitoPorFuncionarioLogado() {
+        when(usuarioRep.existsByEmail("novo@escola.com")).thenReturn(false);
+        Usuario funcionario = new Usuario();
+        funcionario.setPerfil(Perfil.FUNCIONARIO);
+        CadUsuarioDTO dto = new CadUsuarioDTO("Novo", "novo@escola.com", "senha123", 1L, "FUNCIONARIO");
+
+        assertThrows(AccessDeniedException.class, () -> authService.cadastrar(dto, funcionario));
+        verify(usuarioRep, never()).save(any());
+    }
+
+    @Test
+    void deveCadastrarGestorAtivoNaInstituicaoDoDiretor() {
+        when(usuarioRep.existsByEmail("gestor@escola.com")).thenReturn(false);
+        when(passwordEncoder.encode("senha123")).thenReturn("HASH_BCRYPT");
+        when(usuarioRep.save(any(Usuario.class))).thenAnswer(i -> i.getArgument(0));
+        Usuario diretor = new Usuario();
+        diretor.setEmail("diretor@escola.com");
+        diretor.setPerfil(Perfil.ADMINISTRADOR);
+        diretor.setInstituicao(instituicao());
+        // instituicaoId de outra escola é ignorado: vale a escola do Diretor
+        CadUsuarioDTO dto = new CadUsuarioDTO("Gestor", "gestor@escola.com", "senha123", 99L, "GESTOR");
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+
+        authService.cadastrar(dto, diretor);
+
+        verify(usuarioRep).save(captor.capture());
+        assertEquals(1L, captor.getValue().getInstituicao().getId());
+        assertFalse(captor.getValue().isAguardandoAprovacao());
+        verify(instituicaoRep, never()).findById(any());
+    }
+
+    @Test
+    void deveAvisarQueCadastroEstaPendenteQuandoSenhaCorreta() {
+        Usuario pendente = new Usuario();
+        pendente.setSenhaHash("HASH");
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new DisabledException("pendente"));
+        when(usuarioRep.findByEmail("gestor@escola.com")).thenReturn(Optional.of(pendente));
+        when(passwordEncoder.matches("senha123", "HASH")).thenReturn(true);
+
+        CredInvalidaException ex = assertThrows(CredInvalidaException.class,
+                () -> authService.login(new LoginDTO("gestor@escola.com", "senha123")));
+
+        assertEquals("Seu cadastro está aguardando a aprovação do diretor da instituição.", ex.getMessage());
+        verify(jwtUtil, never()).gerarToken(any());
+    }
+
+    @Test
+    void deveRecusarFuncionarioQuandoInstituicaoNaoTemDiretor() {
+
+        when(usuarioRep.existsByEmail("ana@escola.com")).thenReturn(false);
+        when(instituicaoRep.findById(1L)).thenReturn(Optional.of(instituicao()));
+        when(usuarioRep.existsByInstituicao_IdAndPerfilAndAtivoTrue(1L, Perfil.ADMINISTRADOR)).thenReturn(false);
+        CadUsuarioDTO dto = new CadUsuarioDTO("Ana", "ana@escola.com", "senha123", 1L, "FUNCIONARIO");
+
+        NegocioException ex = assertThrows(NegocioException.class, () -> authService.cadastrar(dto, null));
+
+        assertEquals("Esta instituição ainda não tem um diretor cadastrado. "
+                + "Peça ao diretor da sua escola para se cadastrar no sistema e tente novamente depois.",
+                ex.getMessage());
+        verify(usuarioRep, never()).save(any());
     }
 }
