@@ -160,13 +160,15 @@ export default function SolicitacoesPage() {
             </header>
 
             <div className="sol-abas">
-                <button
-                    type="button"
-                    className={aba === "recebidas" ? "ativa" : ""}
-                    onClick={() => trocarAba("recebidas")}
-                >
-                    Recebidas (para minha instituição)
-                </button>
+                {ehGestorOuAdmin && (
+                    <button
+                        type="button"
+                        className={aba === "recebidas" ? "ativa" : ""}
+                        onClick={() => trocarAba("recebidas")}
+                    >
+                        Recebidas (para minha instituição)
+                    </button>
+                )}
                 <button
                     type="button"
                     className={aba === "enviadas" ? "ativa" : ""}
@@ -175,12 +177,6 @@ export default function SolicitacoesPage() {
                     Enviadas (pela minha instituição)
                 </button>
             </div>
-
-            {aba === "recebidas" && !ehGestorOuAdmin && (
-                <p className="recurso-aviso">
-                    Apenas gestores e administradores podem aprovar, recusar e registrar retirada ou devolução.
-                </p>
-            )}
 
             <div className="recurso-filtros">
                 <select value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}>
