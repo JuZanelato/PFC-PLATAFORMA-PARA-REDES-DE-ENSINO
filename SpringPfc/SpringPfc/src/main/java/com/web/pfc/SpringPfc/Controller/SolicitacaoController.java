@@ -70,13 +70,13 @@ public class SolicitacaoController {
     }
 
     @PatchMapping("/{id}/aprovar")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public SolicitacaoRespDTO aprovar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
         return solicitacaoService.aprovar(id, usuarioLogado);
     }
 
     @PatchMapping("/{id}/recusar")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public SolicitacaoRespDTO recusar(@PathVariable Long id,
             @RequestBody(required = false) @Valid RecusarSolicitacaoDTO dto,
             @AuthenticationPrincipal Usuario usuarioLogado) {

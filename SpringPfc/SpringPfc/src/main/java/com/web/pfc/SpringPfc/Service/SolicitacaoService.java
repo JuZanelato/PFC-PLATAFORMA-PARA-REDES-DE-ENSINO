@@ -78,7 +78,7 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoRespDTO aprovar(Long id, Usuario usuario) {
         Solicitacao solicitacao = buscarOuFalhar(id);
-        exigirResponsavelDaDona(solicitacao, usuario);
+        exigirDiretorDaDona(solicitacao, usuario);
         exigirStatus(solicitacao, StatusSolicitacao.PENDENTE, "Somente solicitações pendentes podem ser aprovadas.");
 
         Recurso recurso = solicitacao.getRecurso();
@@ -103,9 +103,9 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoRespDTO recusar(Long id, String motivo, Usuario usuario) {
         Solicitacao solicitacao = buscarOuFalhar(id);
-        exigirResponsavelDaDona(solicitacao, usuario);
+        exigirDiretorDaDona(solicitacao, usuario);
         exigirStatus(solicitacao, StatusSolicitacao.PENDENTE, "Somente solicitações pendentes podem ser recusadas.");
-
+        
         StatusSolicitacao anterior = solicitacao.getStatus();
         solicitacao.setStatus(StatusSolicitacao.RECUSADA);
         solicitacao.setMotivoRecusa(textoOuNulo(motivo));
@@ -237,6 +237,13 @@ public class SolicitacaoService {
                 || !mesmaInstituicao(solicitacao.getInstituicaoDona(), usuario.getInstituicao())) {
             throw new AccessDeniedException(
                     "Apenas o gestor ou administrador da instituição dona do recurso pode executar esta ação.");
+        }
+    }
+
+    private void exigirDiretorDaDona(Solicitacao solicitacao, Usuario usuario) {
+        if (usuario.getPerfil() != Perfil.ADMINISTRADOR
+                || !mesmaInstituicao(solicitacao.getInstituicaoDona(), usuario.getInstituicao())) {
+            throw new AccessDeniedException("Apenas o diretor da instituição dona do recurso pode aprovar ou recusar.");
         }
     }
 
