@@ -59,10 +59,10 @@ export default function Navegacao() {
             </div>
 
             <div className="nav-usuario">
-                <span title={usuario?.email}>
+                <NavLink to="/meus-dados" className="nav-usuario-link" title="Meus dados">
                     {usuario?.nome} · {PERFIL_LABEL[perfil] || perfil}
                     {usuario?.instituicaoNome && <small> — {usuario.instituicaoNome}</small>}
-                </span>
+                </NavLink>
                 <button type="button" onClick={handleSair}>
                     Sair
                 </button>

@@ -25,6 +25,8 @@ import com.web.pfc.SpringPfc.domain.Perfil;
 import com.web.pfc.SpringPfc.domain.Usuario;
 import com.web.pfc.SpringPfc.dto.UsuarioRespDTO;
 import com.web.pfc.SpringPfc.exception.NegocioException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.web.pfc.SpringPfc.dto.AtualizarMeusDadosDTO;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -33,6 +35,8 @@ class UsuarioServiceTest {
     UsuarioRep usuarioRep;
     @Mock
     AuditoriaService auditoriaService;
+    @Mock
+    PasswordEncoder passwordEncoder;
     @InjectMocks
     UsuarioService usuarioService;
 
@@ -90,7 +94,7 @@ class UsuarioServiceTest {
         assertEquals("FUNCIONARIO", lista.get(0).perfil());
         assertEquals("Escola Modelo", lista.get(0).instituicaoNome());
     }
-        @Test
+    @Test
     void deveRetornarListaVaziaQuandoNaoHaUsuarios() {
 
         Usuario diretor = usuario(1L, "diretor@escola.com");
@@ -100,5 +104,50 @@ class UsuarioServiceTest {
         List<UsuarioRespDTO> lista = usuarioService.listarDaInstituicao(diretor);
 
         assertTrue(lista.isEmpty());
+    }
+
+        @Test
+    void deveAlterarONomeSemTrocarASenha() {
+
+        Usuario eu = usuario(1L, "ana@escola.com");
+        when(usuarioRep.findById(1L)).thenReturn(Optional.of(eu));
+
+        UsuarioRespDTO resposta = usuarioService.atualizarMeusDados(eu,
+                new AtualizarMeusDadosDTO("  Ana Souza  ", null, null));
+
+        assertEquals("Ana Souza", resposta.nome());
+        verify(passwordEncoder, never()).encode(any());
+        verify(auditoriaService).registrarAlteracaoDadosProprios(eu, false);
+    }
+
+    @Test
+    void deveTrocarASenhaQuandoSenhaAtualEstaCorreta() {
+
+        Usuario eu = usuario(1L, "ana@escola.com");
+        eu.setSenhaHash("HASH_ANTIGO");
+        when(usuarioRep.findById(1L)).thenReturn(Optional.of(eu));
+        when(passwordEncoder.matches("antiga123", "HASH_ANTIGO")).thenReturn(true);
+        when(passwordEncoder.encode("nova123")).thenReturn("HASH_NOVO");
+
+        usuarioService.atualizarMeusDados(eu, new AtualizarMeusDadosDTO("Ana", "antiga123", "nova123"));
+
+        assertEquals("HASH_NOVO", eu.getSenhaHash());
+        verify(auditoriaService).registrarAlteracaoDadosProprios(eu, true);
+    }
+
+    @Test
+    void deveRecusarTrocaDeSenhaQuandoSenhaAtualEstaErrada() {
+
+        Usuario eu = usuario(1L, "ana@escola.com");
+        eu.setSenhaHash("HASH_ANTIGO");
+        when(usuarioRep.findById(1L)).thenReturn(Optional.of(eu));
+        when(passwordEncoder.matches("errada", "HASH_ANTIGO")).thenReturn(false);
+
+        NegocioException ex = assertThrows(NegocioException.class,
+                () -> usuarioService.atualizarMeusDados(eu, new AtualizarMeusDadosDTO("Ana", "errada", "nova123")));
+
+        assertEquals("A senha atual está incorreta.", ex.getMessage());
+        assertEquals("HASH_ANTIGO", eu.getSenhaHash());
+        verify(usuarioRep, never()).save(any());
     }
 }

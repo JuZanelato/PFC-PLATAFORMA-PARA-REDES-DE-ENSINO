@@ -12,6 +12,7 @@ import SolicitacoesPage from "./Pages/SolicitacoesPage";
 import HistoricoPage from "./Pages/HistoricoPage";
 import DashboardPage from "./Pages/DashboardPage";
 import UsuariosPage from "./Pages/UsuariosPage";
+import MeusDadosPage from "./Pages/MeusDadosPage";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
         <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
         <Route path="/politica-privacidade" element={<PoliticaPrivacidadePage />} />
 
-        {/* Rotas protegidas (exigem login) */}
+        {/* Rotas protegidas */}
         <Route
           path="/auditoria"
           element={
@@ -48,6 +49,16 @@ function App() {
             </RotaProtegida>
           }
         />
+
+        <Route
+          path="/meus-dados"
+          element={
+            <RotaProtegida>
+              <MeusDadosPage />
+            </RotaProtegida>
+          }
+        />
+
         <Route
           path="/recursos"
           element={

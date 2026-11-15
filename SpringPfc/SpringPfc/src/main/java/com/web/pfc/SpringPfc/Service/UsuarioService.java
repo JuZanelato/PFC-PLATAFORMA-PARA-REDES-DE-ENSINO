@@ -9,6 +9,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import com.web.pfc.SpringPfc.dto.AtualizarMeusDadosDTO;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ import java.util.List;
 public class UsuarioService {
     private final UsuarioRep usuarioRep;
     private final AuditoriaService auditoriaService;
+    private final PasswordEncoder passwordEncoder;
 
         public UsuarioRespDTO toRespDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
@@ -72,5 +75,28 @@ public class UsuarioService {
         usuario.setAtivo(false);
         usuarioRep.save(usuario);
         auditoriaService.registrarRecusaUsuario(diretor, id);
+    }
+
+    @Transactional
+    public UsuarioRespDTO atualizarMeusDados(Usuario usuarioLogado, AtualizarMeusDadosDTO dto) {
+        Usuario usuario = usuarioRep.findById(usuarioLogado.getId())
+                .orElseThrow(() -> new NegocioException("Usuário não encontrado."));
+
+        usuario.setNome(dto.nome().trim());
+
+        boolean trocouSenha = dto.novaSenha() != null && !dto.novaSenha().isBlank();
+        if (trocouSenha) {
+            if (dto.senhaAtual() == null || !passwordEncoder.matches(dto.senhaAtual(), usuario.getSenhaHash())) {
+                throw new NegocioException("A senha atual está incorreta.");
+            }
+            if (dto.novaSenha().length() < 6) {
+                throw new NegocioException("A nova senha deve ter ao menos 6 caracteres.");
+            }
+            usuario.setSenhaHash(passwordEncoder.encode(dto.novaSenha()));
+        }
+
+        usuarioRep.save(usuario);
+        auditoriaService.registrarAlteracaoDadosProprios(usuario, trocouSenha);
+        return toRespDTO(usuario);
     }
 }

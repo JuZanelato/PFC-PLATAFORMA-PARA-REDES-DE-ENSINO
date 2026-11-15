@@ -101,4 +101,8 @@ public class AuditoriaService {
     public void registrarAlteracaoDisponibilidadeRecurso(Usuario usuario, Long recursoId, boolean disponivel) {
         salvar(usuario.getEmail(), "RECURSO_DISPONIBILIDADE_ALTERADA:" + recursoId + ":" + disponivel);
     }
+
+        public void registrarAlteracaoDadosProprios(Usuario usuario, boolean trocouSenha) {
+        salvar(usuario.getEmail(), trocouSenha ? "DADOS_PROPRIOS_E_SENHA_ALTERADOS" : "DADOS_PROPRIOS_ALTERADOS");
+    }
 }

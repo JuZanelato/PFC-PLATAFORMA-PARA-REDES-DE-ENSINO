@@ -29,6 +29,12 @@ const usuarioService = {
   inativar: async (id) => {
     await api.patch(`/usuarios/${id}/inativar`);
   },
+
+    atualizarMeusDados: async (dados) => {
+    const { data } = await api.put("/usuarios/me", dados);
+    return data;
+  },
+  
 };
 
 export default usuarioService;

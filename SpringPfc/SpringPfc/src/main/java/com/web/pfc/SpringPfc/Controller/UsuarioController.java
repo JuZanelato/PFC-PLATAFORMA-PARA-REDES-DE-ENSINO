@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.web.pfc.SpringPfc.dto.AtualizarMeusDadosDTO;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -19,6 +21,12 @@ public class UsuarioController {
     @GetMapping("/me")
     public ResponseEntity<UsuarioRespDTO> meuPerfil(@AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(usuarioService.toRespDTO(usuarioLogado));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UsuarioRespDTO> atualizarMeusDados(@RequestBody @Valid AtualizarMeusDadosDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        return ResponseEntity.ok(usuarioService.atualizarMeusDados(usuarioLogado, dto));
     }
     
     @GetMapping
