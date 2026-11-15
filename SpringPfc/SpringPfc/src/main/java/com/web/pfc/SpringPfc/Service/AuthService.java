@@ -3,21 +3,21 @@ package com.web.pfc.SpringPfc.Service;
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
 import com.web.pfc.SpringPfc.Repository.UsuarioRep;
 import com.web.pfc.SpringPfc.config.JwtUtil;
+import com.web.pfc.SpringPfc.domain.Instituicao;
 import com.web.pfc.SpringPfc.domain.Perfil;
+import com.web.pfc.SpringPfc.domain.StatusInst;
 import com.web.pfc.SpringPfc.domain.Usuario;
 import com.web.pfc.SpringPfc.dto.*;
 import com.web.pfc.SpringPfc.exception.CredInvalidaException;
 import com.web.pfc.SpringPfc.exception.NegocioException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.web.pfc.SpringPfc.domain.Instituicao;
-import com.web.pfc.SpringPfc.domain.StatusInst;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -33,7 +33,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuditoriaService auditoriaService;
 
-       @Transactional
+
+    @Transactional
     public UsuarioRespDTO cadastrar(CadUsuarioDTO dto, Usuario responsavel) {
         validarEmailLivre(dto.email());
         Perfil perfil = converterPerfil(dto.perfil());
@@ -42,16 +43,17 @@ public class AuthService {
         boolean aguardandoAprovacao = false;
 
         if (responsavel == null) {
-            
             instituicao = buscarInstituicaoAtiva(dto.instituicaoId());
 
             if (perfil == Perfil.ADMINISTRADOR) {
                 validarInstituicaoSemDiretor(instituicao);
-            } else if (perfil == Perfil.GESTOR) {
-                aguardandoAprovacao = true;
+            } else {
+                validarInstituicaoComDiretor(instituicao);
+                if (perfil == Perfil.GESTOR) {
+                    aguardandoAprovacao = true;
+                }
             }
         } else {
-            
             if (responsavel.getPerfil() != Perfil.ADMINISTRADOR) {
                 throw new AccessDeniedException("Somente o diretor pode cadastrar usuários.");
             }
@@ -69,12 +71,12 @@ public class AuthService {
         return toDTO(salvo);
     }
 
-       public TokenRespDTO login(LoginDTO dto) {
+    public TokenRespDTO login(LoginDTO dto) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
         } catch (DisabledException e) {
-            // Conta pendente (Gestor esperando o Diretor aprovar)
+            
             auditoriaService.registrarTentativaLogin(dto.email(), false);
             boolean senhaCorreta = usuarioRep.findByEmail(dto.email())
                     .map(u -> passwordEncoder.matches(dto.senha(), u.getSenhaHash()))
@@ -151,9 +153,16 @@ public class AuthService {
         }
     }
 
-        private UsuarioRespDTO toDTO(Usuario usuario) {
+    private void validarInstituicaoComDiretor(Instituicao instituicao) {
+        if (!usuarioRep.existsByInstituicao_IdAndPerfilAndAtivoTrue(instituicao.getId(), Perfil.ADMINISTRADOR)) {
+            throw new NegocioException("Esta instituição ainda não tem um diretor cadastrado. "
+                    + "Peça ao diretor da sua escola para se cadastrar no sistema e tente novamente depois.");
+        }
+    }
+
+    private UsuarioRespDTO toDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(),
                 usuario.getPerfil().name(), usuario.getInstituicao().getNome(),
                 usuario.isAtivo(), usuario.isAguardandoAprovacao());
     }
-}   
+}

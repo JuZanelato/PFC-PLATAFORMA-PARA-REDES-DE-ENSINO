@@ -1,9 +1,8 @@
 import axios from "axios";
- 
+
 const api = axios.create({
   baseURL: "http://localhost:8080/api",
 });
- 
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -12,12 +11,12 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
- 
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const ehTentativaDeLogin = error.config?.url?.includes("/auth/login");
+    if (error.response?.status === 401 && !ehTentativaDeLogin) {
       localStorage.removeItem("token");
       localStorage.removeItem("usuario");
       window.location.href = "/login";
@@ -25,5 +24,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
- 
+
 export default api;
