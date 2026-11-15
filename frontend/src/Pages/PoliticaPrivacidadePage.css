@@ -2,9 +2,15 @@
   max-width: 820px;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Arial Nova", Arial, Helvetica, sans-serif;
+  font-size: 12pt;
   color: #1f2430;
   line-height: 1.6;
+}
+
+.politica-page p,
+.politica-page li {
+  text-align: justify;
 }
 
 .politica-page header {
@@ -25,9 +31,10 @@
   margin: 1.6rem 0 0.4rem;
 }
 
-.politica-atualizacao {
+.politica-page .politica-atualizacao {
   color: #6b7080;
-  font-size: 0.85rem;
+  font-size: 10pt;
+  text-align: left;
   margin: 0;
 }
 
