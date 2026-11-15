@@ -385,3 +385,47 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Detalhes da instituição */
+.inst-link {
+  color: #7a1f3d;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.inst-link:hover {
+  text-decoration: underline;
+}
+
+.inst-voltar {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.inst-voltar a {
+  color: #7a1f3d;
+  text-decoration: none;
+}
+
+.inst-voltar a:hover {
+  text-decoration: underline;
+}
+
+.inst-tag {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.inst-tag-ok {
+  background: #e3f4ea;
+  color: #1e6b45;
+}
+
+.inst-tag-off {
+  background: #f1f1f4;
+  color: #6b6375;
+}

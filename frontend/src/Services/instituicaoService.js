@@ -16,6 +16,11 @@ const instituicaoService = {
     return data;
   },
 
+  detalhes: async (id) => {
+    const { data } = await api.get(`/Instituicao/${id}/detalhes`);
+    return data;
+  },
+
   listarPublicas: async () => {
     const { data } = await api.get("/Instituicao/publicas");
     return data;

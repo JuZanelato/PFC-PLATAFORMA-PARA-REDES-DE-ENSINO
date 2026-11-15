@@ -9,10 +9,17 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+        @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<String> handleStatus(ResponseStatusException ex) {
+        String mensagem = ex.getReason() != null ? ex.getReason() : "Não encontrado.";
+        return ResponseEntity.status(ex.getStatusCode()).body(mensagem);
+    }
+    
     @ExceptionHandler(NegocioException.class)
     public ResponseEntity<String> handleNegocio(NegocioException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());

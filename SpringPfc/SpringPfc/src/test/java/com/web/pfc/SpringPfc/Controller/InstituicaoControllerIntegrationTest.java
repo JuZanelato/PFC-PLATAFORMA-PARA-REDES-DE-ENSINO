@@ -189,4 +189,52 @@ class InstituicaoControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].cnpj").doesNotExist())
                 .andExpect(jsonPath("$[0].chavePix").doesNotExist());
     }
+
+        private Instituicao outraEscola(String cnpj, StatusInst status) {
+        Instituicao outra = new Instituicao();
+        outra.setNome("Outra Escola");
+        outra.setCnpj(cnpj);
+        outra.setNumero("2");
+        outra.setEndereco("Rua Outra, 2");
+        outra.setEmail("outra@escola.edu.br");
+        outra.setStatus(status);
+        return instituicaoRep.save(outra);
+    }
+
+    @Test
+    void deveMostrarOsUsuariosNosDetalhesDaPropriaEscola() throws Exception {
+
+        String tokenFuncionario = tokenDe(Perfil.FUNCIONARIO, "func3@integracao.com");
+
+        mockMvc.perform(get(URL + "/" + instituicaoBase.getId() + "/detalhes").header("Authorization", tokenFuncionario))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Instituição Base"))
+                .andExpect(jsonPath("$.minhaInstituicao").value(true))
+                .andExpect(jsonPath("$.usuarios[0].nome").value("Usuário FUNCIONARIO"))
+                .andExpect(jsonPath("$.usuarios[0].email").doesNotExist())
+                .andExpect(jsonPath("$.cnpj").doesNotExist());
+    }
+
+    @Test
+    void naoDeveMostrarOsUsuariosNosDetalhesDeOutraEscola() throws Exception {
+
+        String tokenFuncionario = tokenDe(Perfil.FUNCIONARIO, "func4@integracao.com");
+        Instituicao outra = outraEscola("11222333000144", StatusInst.ATIVA);
+
+        mockMvc.perform(get(URL + "/" + outra.getId() + "/detalhes").header("Authorization", tokenFuncionario))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Outra Escola"))
+                .andExpect(jsonPath("$.minhaInstituicao").value(false))
+                .andExpect(jsonPath("$.usuarios").isEmpty());
+    }
+
+    @Test
+    void deveRetornar404NosDetalhesDeOutraEscolaInativa() throws Exception {
+
+        String tokenFuncionario = tokenDe(Perfil.FUNCIONARIO, "func5@integracao.com");
+        Instituicao inativa = outraEscola("55666777000188", StatusInst.INATIVA);
+
+        mockMvc.perform(get(URL + "/" + inativa.getId() + "/detalhes").header("Authorization", tokenFuncionario))
+                .andExpect(status().isNotFound());
+    }
 }

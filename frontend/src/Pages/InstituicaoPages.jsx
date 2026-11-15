@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import authService from "../Services/authService";
 import instituicaoService from "../Services/instituicaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
@@ -131,7 +132,9 @@ function InstituicoesDaRede() {
       <div className="inst-secao-cabecalho">
         <h2>Instituições da rede</h2>
       </div>
-      <p className="inst-dica">Consulte as escolas que participam da rede de compartilhamento.</p>
+      <p className="inst-dica">
+        Consulte as escolas que participam da rede de compartilhamento. Clique no nome para ver os detalhes.
+      </p>
 
       {erro && <p className="erro-geral">{erro}</p>}
 
@@ -161,7 +164,9 @@ function InstituicoesDaRede() {
               {filtradas.map((inst) => (
                 <tr key={inst.id}>
                   <td>
-                    {inst.nome}
+                    <Link to={`/instituicoes/${inst.id}`} className="inst-link">
+                      {inst.nome}
+                    </Link>
                     {inst.nome === minhaEscola && <span className="inst-sua"> (sua escola)</span>}
                   </td>
                   <td>{inst.endereco}</td>
@@ -189,4 +194,6 @@ export default function InstituicaoPages() {
       <InstituicoesDaRede />
     </div>
   );
+
+  
 }

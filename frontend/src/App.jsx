@@ -13,6 +13,7 @@ import HistoricoPage from "./Pages/HistoricoPage";
 import DashboardPage from "./Pages/DashboardPage";
 import UsuariosPage from "./Pages/UsuariosPage";
 import MeusDadosPage from "./Pages/MeusDadosPage";
+import InstituicaoDetalhePage from "./Pages/InstituicaoDetalhePage";
 
 function App() {
   return (
@@ -50,6 +51,14 @@ function App() {
           }
         />
 
+        <Route
+          path="/instituicoes/:id"
+          element={
+            <RotaProtegida>
+              <InstituicaoDetalhePage />
+            </RotaProtegida>
+          }
+        />
         <Route
           path="/meus-dados"
           element={

@@ -1,6 +1,7 @@
 package com.web.pfc.SpringPfc.Controller;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,11 +22,15 @@ import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 
 import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
+import com.web.pfc.SpringPfc.Repository.RecursoRep;
+import com.web.pfc.SpringPfc.Repository.UsuarioRep;
 import com.web.pfc.SpringPfc.Service.AuditoriaService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
 import com.web.pfc.SpringPfc.domain.Perfil;
 import com.web.pfc.SpringPfc.domain.StatusInst;
+import com.web.pfc.SpringPfc.domain.StatusRecurso;
 import com.web.pfc.SpringPfc.domain.Usuario;
+import com.web.pfc.SpringPfc.dto.InstituicaoDetalheDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoRedeDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
 import com.web.pfc.SpringPfc.exception.NegocioException;
@@ -36,10 +41,15 @@ public class InstituicaoController {
 
         private InstituicaoRep instituicaorep;
         private AuditoriaService auditoriaService;
+        private UsuarioRep usuarioRep;
+        private RecursoRep recursoRep;
 
-        public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService) {
+        public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService,
+                        UsuarioRep usuarioRep, RecursoRep recursoRep) {
                 this.instituicaorep = instituicaorep;
                 this.auditoriaService = auditoriaService;
+                this.usuarioRep = usuarioRep;
+                this.recursoRep = recursoRep;
         }
 
         @PostMapping
@@ -122,6 +132,40 @@ public class InstituicaoController {
                                 .filter(i -> i.getStatus() != StatusInst.INATIVA)
                                 .map(i -> new InstituicaoRedeDTO(i.getId(), i.getNome(), i.getEndereco(), i.getEmail()))
                                 .toList();
+        }
+
+
+        @GetMapping("{id}/detalhes")
+        public InstituicaoDetalheDTO detalhes(
+                        @PathVariable("id") Long id,
+                        @AuthenticationPrincipal Usuario usuarioLogado) {
+
+                Instituicao instituicao = buscarOuFalhar(id);
+                boolean minha = Objects.equals(id, usuarioLogado.getInstituicao().getId());
+
+                if (!minha && instituicao.getStatus() == StatusInst.INATIVA) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Instituição não encontrada");
+                }
+
+                List<InstituicaoDetalheDTO.UsuarioDaEscola> usuarios = List.of();
+                if (minha) {
+                        usuarios = usuarioRep.findByInstituicao_IdOrderByNomeAsc(id).stream()
+                                        .filter(u -> u.isAtivo() && !u.isAguardandoAprovacao())
+                                        .map(u -> new InstituicaoDetalheDTO.UsuarioDaEscola(u.getNome(), u.getPerfil().name()))
+                                        .toList();
+                }
+
+                List<InstituicaoDetalheDTO.RecursoDaEscola> recursos = recursoRep.findByInstituicaoId(id).stream()
+                                .filter(r -> r.getStatus() == StatusRecurso.ATIVO)
+                                .sorted(Comparator.comparing(r -> r.getNome().toLowerCase()))
+                                .map(r -> new InstituicaoDetalheDTO.RecursoDaEscola(r.getId(), r.getNome(),
+                                                r.getCategoria().name(), r.getQuantidade(),
+                                                r.getCondicao().name(), r.isDisponivel()))
+                                .toList();
+
+                return new InstituicaoDetalheDTO(instituicao.getId(), instituicao.getNome(), instituicao.getEndereco(),
+                                instituicao.getNumero(), instituicao.getCep(), instituicao.getEmail(), minha,
+                                usuarios, recursos);
         }
 
 
