@@ -13,6 +13,7 @@ import "./SolicitacoesPage.css";
 export default function SolicitacoesPage() {
     const usuario = authService.usuarioLogado();
     const ehGestorOuAdmin = usuario?.perfil === "GESTOR" || usuario?.perfil === "ADMINISTRADOR";
+    const ehDiretor = usuario?.perfil === "ADMINISTRADOR";
 
     const [aba, setAba] = useState(ehGestorOuAdmin ? "recebidas" : "enviadas");
     const [statusFiltro, setStatusFiltro] = useState("");
@@ -113,7 +114,14 @@ export default function SolicitacoesPage() {
         const ocupado = processando === s.id;
         const botoes = [];
         if (aba === "recebidas" && ehGestorOuAdmin) {
-            if (s.status === "PENDENTE") {
+            if (s.status === "PENDENTE" && !ehDiretor) {
+                botoes.push(
+                    <span key="aguardando" className="aguardando-diretor">
+                        Aguardando o diretor
+                    </span>
+                );
+            }
+            if (s.status === "PENDENTE" && ehDiretor) {
                 botoes.push(
                     <button key="aprovar" type="button" disabled={ocupado} onClick={() => handleAprovar(s)}>
                         Aprovar

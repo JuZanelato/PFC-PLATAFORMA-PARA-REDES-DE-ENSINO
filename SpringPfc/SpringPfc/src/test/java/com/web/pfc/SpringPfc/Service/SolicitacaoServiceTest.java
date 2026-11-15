@@ -63,9 +63,9 @@ class SolicitacaoServiceTest {
     private Usuario funcionarioDona;
     private Usuario funcionarioSolicitante;
     private Usuario gestorOutraEscola;
-    private Recurso recurso;
     private Usuario diretorDona;
     private Usuario diretorOutraEscola;
+    private Recurso recurso;
 
     @BeforeEach
     void configurar() {
@@ -197,7 +197,7 @@ class SolicitacaoServiceTest {
         verify(solicitacaoRep, never()).save(any());
     }
 
-        @Test
+    @Test
     void diretorDaDonaAprovaEReservaAQuantidade_RN04() {
         Solicitacao s = solicitacao(StatusSolicitacao.PENDENTE, 4);
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(s));
@@ -286,7 +286,17 @@ class SolicitacaoServiceTest {
         assertEquals("Itens reservados para evento", resp.motivoRecusa());
         verify(auditoriaService).registrarSolicitacao(diretorDona, 500L, "RECUSADA");
     }
-    
+
+    @Test
+    void registraRetiradaSomenteAposAprovacao() {
+        when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.APROVADA, 2)));
+        salvarDevolveOProprioObjeto();
+
+        SolicitacaoRespDTO resp = service.registrarRetirada(500L, gestorDona);
+
+        assertEquals("RETIRADA", resp.status());
+    }
+
     @Test
     void devolucaoConcluiASolicitacaoELiberaORecurso_RN05() {
         recurso.setQuantidade(0);
