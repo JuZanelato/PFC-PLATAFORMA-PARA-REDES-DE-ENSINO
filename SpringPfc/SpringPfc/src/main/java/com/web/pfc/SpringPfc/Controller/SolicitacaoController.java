@@ -47,6 +47,7 @@ public class SolicitacaoController {
     }
 
     @GetMapping("/recebidas")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GESTOR')")
     public List<SolicitacaoRespDTO> recebidas(@RequestParam(required = false) StatusSolicitacao status,
             @AuthenticationPrincipal Usuario usuarioLogado) {
         return solicitacaoService.listarRecebidas(usuarioLogado, status);
