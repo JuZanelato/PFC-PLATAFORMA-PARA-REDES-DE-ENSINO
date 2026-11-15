@@ -13,6 +13,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -121,6 +122,10 @@ class SolicitacaoServiceTest {
         return s;
     }
 
+    private LocalDate daquiUmaSemana() {
+        return LocalDate.now().plusDays(7);
+    }
+
     private void salvarDevolveOProprioObjeto() {
         when(solicitacaoRep.save(any(Solicitacao.class))).thenAnswer(inv -> inv.getArgument(0));
     }
@@ -133,12 +138,13 @@ class SolicitacaoServiceTest {
         salvarDevolveOProprioObjeto();
 
         SolicitacaoRespDTO resp = service.criar(
-                new SolicitacaoCriarDTO(100L, 3, "Turma do 5º ano"), funcionarioSolicitante);
+                new SolicitacaoCriarDTO(100L, 3, "Turma do 5º ano", daquiUmaSemana()), funcionarioSolicitante);
 
         assertEquals("PENDENTE", resp.status());
         assertEquals(3, resp.quantidade().intValue());
         assertEquals("EMEF Dona", resp.instituicaoDonaNome());
         assertEquals("Func Solicitante", resp.solicitanteNome());
+        assertEquals(daquiUmaSemana(), resp.dataPrevistaDevolucao());
 
         ArgumentCaptor<MovimentacaoSolicitacao> mov = ArgumentCaptor.forClass(MovimentacaoSolicitacao.class);
         verify(movimentacaoRep).save(mov.capture());
@@ -154,7 +160,7 @@ class SolicitacaoServiceTest {
         when(recursoRep.findById(100L)).thenReturn(Optional.of(recurso));
 
         assertThrows(NegocioException.class,
-                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null), funcionarioDona));
+                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null, daquiUmaSemana()), funcionarioDona));
         verify(solicitacaoRep, never()).save(any());
     }
 
@@ -164,7 +170,7 @@ class SolicitacaoServiceTest {
         when(recursoRep.findById(100L)).thenReturn(Optional.of(recurso));
 
         NegocioException erro = assertThrows(NegocioException.class,
-                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null), funcionarioSolicitante));
+                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null, daquiUmaSemana()), funcionarioSolicitante));
         assertTrue(erro.getMessage().contains("RN02"));
         verify(solicitacaoRep, never()).save(any());
     }
@@ -175,7 +181,7 @@ class SolicitacaoServiceTest {
         when(recursoRep.findById(100L)).thenReturn(Optional.of(recurso));
 
         assertThrows(NegocioException.class,
-                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null), funcionarioSolicitante));
+                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null, daquiUmaSemana()), funcionarioSolicitante));
     }
 
     @Test
@@ -183,7 +189,7 @@ class SolicitacaoServiceTest {
         when(recursoRep.findById(100L)).thenReturn(Optional.of(recurso));
 
         assertThrows(NegocioException.class,
-                () -> service.criar(new SolicitacaoCriarDTO(100L, 11, null), funcionarioSolicitante));
+                () -> service.criar(new SolicitacaoCriarDTO(100L, 11, null, daquiUmaSemana()), funcionarioSolicitante));
     }
 
     @Test
@@ -193,7 +199,7 @@ class SolicitacaoServiceTest {
                 .thenReturn(true);
 
         assertThrows(NegocioException.class,
-                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null), funcionarioSolicitante));
+                () -> service.criar(new SolicitacaoCriarDTO(100L, 1, null, daquiUmaSemana()), funcionarioSolicitante));
         verify(solicitacaoRep, never()).save(any());
     }
 
@@ -362,5 +368,30 @@ class SolicitacaoServiceTest {
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 1)));
 
         assertThrows(AccessDeniedException.class, () -> service.historico(500L, gestorOutraEscola));
+    }
+
+    @Test
+    void naoDeveAceitarDataPrevistaDeDevolucaoNoPassado() {
+        when(recursoRep.findById(100L)).thenReturn(Optional.of(recurso));
+
+        NegocioException erro = assertThrows(NegocioException.class, () -> service.criar(
+                new SolicitacaoCriarDTO(100L, 1, null, LocalDate.now().minusDays(1)), funcionarioSolicitante));
+        assertEquals("Informe uma data prevista de devolução a partir de hoje.", erro.getMessage());
+        verify(solicitacaoRep, never()).save(any());
+    }
+
+    @Test
+    void marcaComoAtrasadaQuandoORecursoFoiRetiradoEAPrevisaoJaPassou() {
+        Solicitacao atrasada = solicitacao(StatusSolicitacao.RETIRADA, 1);
+        atrasada.setDataPrevistaDevolucao(LocalDate.now().minusDays(2));
+        Solicitacao noPrazo = solicitacao(StatusSolicitacao.RETIRADA, 1);
+        noPrazo.setId(501L);
+        noPrazo.setDataPrevistaDevolucao(LocalDate.now().plusDays(2));
+        when(solicitacaoRep.findByInstituicaoDona_IdOrderByCriadaEmDesc(1L)).thenReturn(List.of(atrasada, noPrazo));
+
+        List<SolicitacaoRespDTO> resultado = service.listarRecebidas(gestorDona, null);
+
+        assertTrue(resultado.get(0).atrasada());
+        assertFalse(resultado.get(1).atrasada());
     }
 }

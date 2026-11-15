@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from "react";
 import authService from "../Services/authService";
 import solicitacaoService, {
     STATUS_SOLICITACAO,
+    formatarData,
     formatarDataHora,
 } from "../Services/solicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
@@ -214,6 +215,7 @@ export default function SolicitacoesPage() {
                             <th>{aba === "recebidas" ? "Solicitante" : "Instituição dona"}</th>
                             <th>Status</th>
                             <th>Criada em</th>
+                            <th>Devolução prevista</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -238,11 +240,15 @@ export default function SolicitacoesPage() {
                                         <StatusBadge status={s.status} />
                                     </td>
                                     <td>{formatarDataHora(s.criadaEm)}</td>
+                                    <td>
+                                        {formatarData(s.dataPrevistaDevolucao)}
+                                        {s.atrasada && <span className="sol-atrasada">Atrasada</span>}
+                                    </td>
                                     <td className="recurso-acoes sol-acoes">{acoesDaLinha(s)}</td>
                                 </tr>
                                 {historicoAberto === s.id && (
                                     <tr className="sol-historico-linha">
-                                        <td colSpan={7}>
+                                        <td colSpan={8}>
                                             <ol className="sol-linha-tempo">
                                                 {historico.map((m) => (
                                                     <li key={m.id}>

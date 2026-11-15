@@ -254,19 +254,20 @@ export default function CadastroPage() {
               </ul>
             )}
 
-            {naoEncontrada && (
+            {form.perfil === "ADMINISTRADOR" && !instituicaoEscolhida && (
+              <div className="cad-aviso">
+                <strong>{naoEncontrada ? "Instituição não cadastrada." : "A sua escola ainda não está no sistema?"}</strong>
+                <span>Como diretor, você pode cadastrar a instituição agora e depois concluir a sua conta.</span>
+                <button type="button" onClick={() => setMostrarFormInstituicao(true)}>
+                  Cadastrar instituição
+                </button>
+              </div>
+            )}
+
+            {form.perfil !== "ADMINISTRADOR" && naoEncontrada && (
               <div className="cad-aviso">
                 <strong>Instituição não cadastrada.</strong>
-                {form.perfil === "ADMINISTRADOR" ? (
-                  <>
-                    <span>Para continuar, cadastre a instituição.</span>
-                    <button type="button" onClick={() => setMostrarFormInstituicao(true)}>
-                      Cadastrar instituição
-                    </button>
-                  </>
-                ) : (
-                  <span>Peça ao diretor da sua escola para cadastrá-la primeiro.</span>
-                )}
+                <span>Peça ao diretor da sua escola para cadastrá-la primeiro.</span>
               </div>
             )}
 

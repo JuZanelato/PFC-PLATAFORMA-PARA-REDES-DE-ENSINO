@@ -1,5 +1,6 @@
 package com.web.pfc.SpringPfc.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -54,6 +55,10 @@ public class SolicitacaoService {
 
         validarRecursoDisponivel(recurso, dto.quantidade());
 
+        if (dto.dataPrevistaDevolucao() == null || dto.dataPrevistaDevolucao().isBefore(LocalDate.now())) {
+            throw new NegocioException("Informe uma data prevista de devolução a partir de hoje.");
+        }
+
         if (solicitacaoRep.existsByRecurso_IdAndInstituicaoSolicitante_IdAndStatusIn(
                 recurso.getId(), minhaInstituicao.getId(), EM_ANDAMENTO)) {
             throw new NegocioException("Sua instituição já possui uma solicitação em andamento para este recurso.");
@@ -66,6 +71,7 @@ public class SolicitacaoService {
         solicitacao.setInstituicaoDona(recurso.getInstituicao());
         solicitacao.setQuantidade(dto.quantidade());
         solicitacao.setJustificativa(textoOuNulo(dto.justificativa()));
+        solicitacao.setDataPrevistaDevolucao(dto.dataPrevistaDevolucao());
         solicitacao.setStatus(StatusSolicitacao.PENDENTE);
         solicitacao.setCriadaEm(LocalDateTime.now());
 
@@ -105,7 +111,7 @@ public class SolicitacaoService {
         Solicitacao solicitacao = buscarOuFalhar(id);
         exigirDiretorDaDona(solicitacao, usuario);
         exigirStatus(solicitacao, StatusSolicitacao.PENDENTE, "Somente solicitações pendentes podem ser recusadas.");
-        
+
         StatusSolicitacao anterior = solicitacao.getStatus();
         solicitacao.setStatus(StatusSolicitacao.RECUSADA);
         solicitacao.setMotivoRecusa(textoOuNulo(motivo));
@@ -236,10 +242,11 @@ public class SolicitacaoService {
         if (!ehGestorOuAdmin(usuario)
                 || !mesmaInstituicao(solicitacao.getInstituicaoDona(), usuario.getInstituicao())) {
             throw new AccessDeniedException(
-                    "Apenas o gestor ou administrador da instituição dona do recurso pode executar esta ação.");
+                    "Apenas o gestor ou o diretor da instituição dona do recurso pode executar esta ação.");
         }
     }
 
+    // NOVO (Etapa 2): só o Diretor da instituição dona aprova ou recusa
     private void exigirDiretorDaDona(Solicitacao solicitacao, Usuario usuario) {
         if (usuario.getPerfil() != Perfil.ADMINISTRADOR
                 || !mesmaInstituicao(solicitacao.getInstituicaoDona(), usuario.getInstituicao())) {
@@ -305,7 +312,16 @@ public class SolicitacaoService {
                 s.getCriadaEm(),
                 s.getRespondidaEm(),
                 s.getRetiradaEm(),
-                s.getDevolvidaEm());
+                s.getDevolvidaEm(),
+                s.getDataPrevistaDevolucao(),
+                estaAtrasada(s));
+    }
+
+    // NOVO (BF05): atrasada = recurso já retirado e a data prevista já passou
+    private boolean estaAtrasada(Solicitacao s) {
+        return s.getStatus() == StatusSolicitacao.RETIRADA
+                && s.getDataPrevistaDevolucao() != null
+                && s.getDataPrevistaDevolucao().isBefore(LocalDate.now());
     }
 
     private MovimentacaoRespDTO toDTO(MovimentacaoSolicitacao m, Usuario quemConsulta) {

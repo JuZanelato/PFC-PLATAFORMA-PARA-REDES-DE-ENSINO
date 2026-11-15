@@ -1,5 +1,6 @@
 package com.web.pfc.SpringPfc.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record SolicitacaoRespDTO(
@@ -19,5 +20,7 @@ public record SolicitacaoRespDTO(
         LocalDateTime criadaEm,
         LocalDateTime respondidaEm,
         LocalDateTime retiradaEm,
-        LocalDateTime devolvidaEm) {
+        LocalDateTime devolvidaEm,
+        LocalDate dataPrevistaDevolucao,
+        boolean atrasada) {
 }

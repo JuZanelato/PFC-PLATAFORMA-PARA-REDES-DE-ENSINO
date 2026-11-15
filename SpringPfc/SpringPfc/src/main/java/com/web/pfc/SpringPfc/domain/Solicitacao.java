@@ -1,5 +1,6 @@
 package com.web.pfc.SpringPfc.domain;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -68,4 +69,8 @@ public class Solicitacao {
 
     @Column(name = "devolvida_em")
     private LocalDateTime devolvidaEm;
+
+    // NOVO (BF04): data em que quem pediu promete devolver o recurso
+    @Column(name = "data_prevista_devolucao")
+    private LocalDate dataPrevistaDevolucao;
 }

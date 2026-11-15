@@ -12,9 +12,27 @@ export const STATUS_SOLICITACAO = {
 export const formatarDataHora = (valor) =>
     valor ? new Date(valor).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
 
+export const formatarData = (valor) => {
+    if (!valor) return "—";
+    const [ano, mes, dia] = valor.split("-");
+    return `${dia}/${mes}/${ano}`;
+};
+
+export const hojeISO = () => {
+    const hoje = new Date();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    return `${hoje.getFullYear()}-${mes}-${dia}`;
+};
+
 const solicitacaoService = {
-    criar: async ({ recursoId, quantidade, justificativa }) => {
-        const { data } = await api.post("/solicitacoes", { recursoId, quantidade, justificativa });
+    criar: async ({ recursoId, quantidade, justificativa, dataPrevistaDevolucao }) => {
+        const { data } = await api.post("/solicitacoes", {
+            recursoId,
+            quantidade,
+            justificativa,
+            dataPrevistaDevolucao,
+        });
         return data;
     },
 

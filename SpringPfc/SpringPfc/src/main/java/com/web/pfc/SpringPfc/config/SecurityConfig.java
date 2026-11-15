@@ -38,7 +38,8 @@ public class SecurityConfig {
                                 "/api/auth/cadastro",
                                 "/api/auth/recuperar-senha",
                                 "/api/auth/redefinir-senha",
-                                "/api/Instituicao/publicas")
+                                "/api/Instituicao/publicas",
+                                "/error")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/Instituicao").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
