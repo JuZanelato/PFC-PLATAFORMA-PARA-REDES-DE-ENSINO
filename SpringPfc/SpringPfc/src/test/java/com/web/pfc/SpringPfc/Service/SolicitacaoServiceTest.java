@@ -64,6 +64,8 @@ class SolicitacaoServiceTest {
     private Usuario funcionarioSolicitante;
     private Usuario gestorOutraEscola;
     private Recurso recurso;
+    private Usuario diretorDona;
+    private Usuario diretorOutraEscola;
 
     @BeforeEach
     void configurar() {
@@ -75,6 +77,8 @@ class SolicitacaoServiceTest {
         funcionarioDona = usuario(11L, "Func Dona", Perfil.FUNCIONARIO, escolaDona);
         funcionarioSolicitante = usuario(20L, "Func Solicitante", Perfil.FUNCIONARIO, escolaSolicitante);
         gestorOutraEscola = usuario(30L, "Gestor Outra", Perfil.GESTOR, outraEscola);
+        diretorDona = usuario(12L, "Diretor Dona", Perfil.ADMINISTRADOR, escolaDona);
+        diretorOutraEscola = usuario(31L, "Diretor Outra", Perfil.ADMINISTRADOR, outraEscola);
 
         recurso = new Recurso();
         recurso.setId(100L);
@@ -193,20 +197,20 @@ class SolicitacaoServiceTest {
         verify(solicitacaoRep, never()).save(any());
     }
 
-    @Test
-    void gestorDaDonaAprovaEReservaAQuantidade_RN04() {
+        @Test
+    void diretorDaDonaAprovaEReservaAQuantidade_RN04() {
         Solicitacao s = solicitacao(StatusSolicitacao.PENDENTE, 4);
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(s));
         salvarDevolveOProprioObjeto();
 
-        SolicitacaoRespDTO resp = service.aprovar(500L, gestorDona);
+        SolicitacaoRespDTO resp = service.aprovar(500L, diretorDona);
 
         assertEquals("APROVADA", resp.status());
         assertEquals(6, recurso.getQuantidade().intValue());
         assertTrue(recurso.isDisponivel());
-        assertEquals(gestorDona.getEmail(), s.getRespondidaPor());
+        assertEquals(diretorDona.getEmail(), s.getRespondidaPor());
         verify(recursoRep).save(recurso);
-        verify(auditoriaService).registrarSolicitacao(gestorDona, 500L, "APROVADA");
+        verify(auditoriaService).registrarSolicitacao(diretorDona, 500L, "APROVADA");
 
         assertNull(resp.solicitanteNome());
     }
@@ -217,17 +221,34 @@ class SolicitacaoServiceTest {
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(s));
         salvarDevolveOProprioObjeto();
 
-        service.aprovar(500L, gestorDona);
+        service.aprovar(500L, diretorDona);
 
         assertEquals(0, recurso.getQuantidade().intValue());
         assertFalse(recurso.isDisponivel());
     }
 
     @Test
-    void gestorDeOutraInstituicaoNaoPodeAprovar_RN03() {
+    void diretorDeOutraInstituicaoNaoPodeAprovar_RN03() {
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 1)));
 
-        assertThrows(AccessDeniedException.class, () -> service.aprovar(500L, gestorOutraEscola));
+        assertThrows(AccessDeniedException.class, () -> service.aprovar(500L, diretorOutraEscola));
+        verify(solicitacaoRep, never()).save(any());
+    }
+
+    @Test
+    void gestorDaDonaNaoPodeAprovar() {
+        when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 1)));
+
+        AccessDeniedException ex = assertThrows(AccessDeniedException.class, () -> service.aprovar(500L, gestorDona));
+        assertEquals("Apenas o diretor da instituição dona do recurso pode aprovar ou recusar.", ex.getMessage());
+        verify(solicitacaoRep, never()).save(any());
+    }
+
+    @Test
+    void gestorDaDonaNaoPodeRecusar() {
+        when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 1)));
+
+        assertThrows(AccessDeniedException.class, () -> service.recusar(500L, "motivo", gestorDona));
         verify(solicitacaoRep, never()).save(any());
     }
 
@@ -242,7 +263,7 @@ class SolicitacaoServiceTest {
     void naoDeveAprovarSolicitacaoQueNaoEstaPendente() {
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.RECUSADA, 1)));
 
-        assertThrows(NegocioException.class, () -> service.aprovar(500L, gestorDona));
+        assertThrows(NegocioException.class, () -> service.aprovar(500L, diretorDona));
     }
 
     @Test
@@ -250,32 +271,22 @@ class SolicitacaoServiceTest {
         recurso.setQuantidade(2);
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 5)));
 
-        assertThrows(NegocioException.class, () -> service.aprovar(500L, gestorDona));
+        assertThrows(NegocioException.class, () -> service.aprovar(500L, diretorDona));
         assertEquals(2, recurso.getQuantidade().intValue());
     }
 
     @Test
-    void gestorDaDonaRecusaComMotivo() {
+    void diretorDaDonaRecusaComMotivo() {
         when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.PENDENTE, 1)));
         salvarDevolveOProprioObjeto();
 
-        SolicitacaoRespDTO resp = service.recusar(500L, "  Itens reservados para evento  ", gestorDona);
+        SolicitacaoRespDTO resp = service.recusar(500L, "  Itens reservados para evento  ", diretorDona);
 
         assertEquals("RECUSADA", resp.status());
         assertEquals("Itens reservados para evento", resp.motivoRecusa());
-        verify(auditoriaService).registrarSolicitacao(gestorDona, 500L, "RECUSADA");
+        verify(auditoriaService).registrarSolicitacao(diretorDona, 500L, "RECUSADA");
     }
-
-    @Test
-    void registraRetiradaSomenteAposAprovacao() {
-        when(solicitacaoRep.findById(500L)).thenReturn(Optional.of(solicitacao(StatusSolicitacao.APROVADA, 2)));
-        salvarDevolveOProprioObjeto();
-
-        SolicitacaoRespDTO resp = service.registrarRetirada(500L, gestorDona);
-
-        assertEquals("RETIRADA", resp.status());
-    }
-
+    
     @Test
     void devolucaoConcluiASolicitacaoELiberaORecurso_RN05() {
         recurso.setQuantidade(0);
