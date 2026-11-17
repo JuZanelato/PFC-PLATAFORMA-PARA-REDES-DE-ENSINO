@@ -134,7 +134,10 @@ export default function CadastroPage() {
     return (
       <div className="cadastro-page">
         <div className="cadastro-form">
-          <h1>Cadastrar usuário</h1>
+          <header className="cad-cabecalho">
+            <p className="cad-marca">CompartilhaEdu</p>
+            <h1>Cadastrar usuário</h1>
+          </header>
           <p className="cad-aviso">
             Você está logado como {PERFIL_LABEL[usuarioLogado.perfil] || usuarioLogado.perfil}. Apenas o diretor
             da escola pode cadastrar novos usuários.
@@ -149,7 +152,10 @@ export default function CadastroPage() {
     return (
       <div className="cadastro-page">
         <div className="cadastro-form">
-          <h1>Cadastro enviado</h1>
+          <header className="cad-cabecalho">
+            <p className="cad-marca">CompartilhaEdu</p>
+            <h1>Cadastro enviado</h1>
+          </header>
           <p className="cad-sucesso">
             Sua conta de Gestor foi criada e está aguardando a aprovação do diretor da{" "}
             <strong>{instituicaoEscolhida?.nome}</strong>. Assim que ele aprovar, você poderá entrar no sistema.
@@ -164,7 +170,10 @@ export default function CadastroPage() {
     return (
       <div className="cadastro-page">
         <div className="cad-instituicao">
-          <h1>Cadastrar instituição</h1>
+          <header className="cad-cabecalho">
+            <p className="cad-marca">CompartilhaEdu</p>
+            <h1>Cadastrar instituição</h1>
+          </header>
           <p className="cad-dica">
             Preencha os dados da sua escola. Depois de salvar, você volta para concluir o seu cadastro como Diretor.
           </p>
@@ -180,7 +189,10 @@ export default function CadastroPage() {
   return (
     <div className="cadastro-page">
       <form className="cadastro-form" onSubmit={handleSubmit}>
-        <h1>{diretorLogado ? "Cadastrar usuário" : "Criar conta"}</h1>
+        <header className="cad-cabecalho">
+          <p className="cad-marca">CompartilhaEdu</p>
+          <h1>{diretorLogado ? "Cadastrar usuário" : "Criar conta"}</h1>
+        </header>
 
         {erros.geral && <p className="erro-geral">{erros.geral}</p>}
         {aviso && <p className="cad-sucesso">{aviso}</p>}
