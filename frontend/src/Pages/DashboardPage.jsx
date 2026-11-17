@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dashboardService from "../Services/dashboardService";
 import { CATEGORIA_OPTIONS } from "../Services/recursoService";
-import { STATUS_SOLICITACAO } from "../Services/SolicitacaoService";
+import { STATUS_SOLICITACAO } from "../Services/solicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import GraficoBarras from "../Components/GraficoBarras";
 import "./DashboardPage.css";
