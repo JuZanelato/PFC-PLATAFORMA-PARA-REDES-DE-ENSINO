@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import authService from "../Services/authService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import "./LoginPage.css";
@@ -12,9 +12,11 @@ const SUBTITULOS = {
 };
 
 export default function RecuperarSenhaPage() {
-  const [etapa, setEtapa] = useState(1);
+  const [searchParams] = useSearchParams();
+  const tokenDoLink = searchParams.get("token") || "";
+  const [etapa, setEtapa] = useState(tokenDoLink ? 2 : 1);
   const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(tokenDoLink);
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -67,7 +69,7 @@ export default function RecuperarSenhaPage() {
         {etapa === 1 && (
           <form className="login-form" onSubmit={handleSolicitar}>
             <p className="login-dica">
-              Informe o e-mail da sua conta. Vamos gerar um código para você criar uma nova senha.
+              Informe o e-mail da sua conta. Vamos enviar um e-mail com um link e um código para você criar uma nova senha.
             </p>
             {erro && <p className="login-erro">{erro}</p>}
             <label>
@@ -81,7 +83,7 @@ export default function RecuperarSenhaPage() {
               />
             </label>
             <button type="submit" className="login-entrar" disabled={enviando}>
-              {enviando ? "Enviando..." : "Gerar código"}
+              {enviando ? "Enviando..." : "Enviar e-mail"}
             </button>
           </form>
         )}
@@ -89,8 +91,9 @@ export default function RecuperarSenhaPage() {
         {etapa === 2 && (
           <form className="login-form" onSubmit={handleRedefinir}>
             <p className="login-info">
-              Se o e-mail estiver cadastrado, um código de recuperação foi gerado. Ele vale por 1 hora e só pode ser
-              usado uma vez.
+              {tokenDoLink
+                ? "Código do e-mail preenchido. Agora escolha a sua nova senha."
+                : "Se o e-mail estiver cadastrado, enviamos uma mensagem com o link e o código de recuperação. Eles valem por 1 hora e só podem ser usados uma vez. Confira também a caixa de spam."}
             </p>
             {erro && <p className="login-erro">{erro}</p>}
             <label>
