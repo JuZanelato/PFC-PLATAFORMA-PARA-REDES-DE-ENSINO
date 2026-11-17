@@ -73,8 +73,8 @@ export default function PoliticaPrivacidadePage() {
           <li>Avisos sobre solicitações de empréstimo: nova solicitação, aprovação, recusa e lembretes de devolução.</li>
         </ul>
         <p>
-          Os e-mails são enviados pelo serviço Gmail, do Google, que recebe apenas o endereço do destinatário e o
-          conteúdo da mensagem. Não enviamos propagandas.
+          Os e-mails são enviados pelo serviço Brevo, empresa sediada na União Europeia, que recebe apenas o
+          endereço do destinatário e o conteúdo da mensagem. Não enviamos propagandas.
         </p>
       </section>
 
