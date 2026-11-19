@@ -8,6 +8,119 @@ import "./InstituicoesPages.css";
 
 const rotulo = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label || valor;
 
+function DoacaoPix({ instituicaoId, nomeEscola, chavePix, minhaInstituicao }) {
+  const [copiado, setCopiado] = useState(false);
+  const [abrirForm, setAbrirForm] = useState(false);
+  const [valor, setValor] = useState("");
+  const [mensagem, setMensagem] = useState("");
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
+  const copiar = () => {
+    navigator.clipboard
+      .writeText(chavePix)
+      .then(() => {
+        setCopiado(true);
+        setTimeout(() => setCopiado(false), 2000);
+      })
+      .catch(() => setErro("Não foi possível copiar. Selecione a chave e copie manualmente."));
+  };
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    setErro("");
+    const numero = Number(valor.replace(",", "."));
+    if (!numero || numero <= 0) {
+      setErro("Informe um valor maior que zero.");
+      return;
+    }
+    setEnviando(true);
+    try {
+      await instituicaoService.informarDoacao(instituicaoId, { valor: numero, mensagem });
+      setSucesso("Obrigado! A sua doação foi registrada e a escola poderá vê-la.");
+      setAbrirForm(false);
+      setValor("");
+      setMensagem("");
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Não foi possível registrar a doação."));
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  return (
+    <section className="inst-secao">
+      <div className="inst-pix">
+        <h2>{minhaInstituicao ? "Chave Pix da sua escola" : `Apoie a ${nomeEscola}`}</h2>
+        <p className="inst-pix-texto">
+          {minhaInstituicao
+            ? "É assim que as outras escolas da rede veem a sua chave Pix para doações."
+            : "Esta escola recebe doações via Pix. Use a chave abaixo no aplicativo do seu banco e, depois, informe a doação aqui."}
+        </p>
+        <div className="inst-pix-chave">
+          <code>{chavePix}</code>
+          <button type="button" className="btn-copiar" onClick={copiar}>
+            {copiado ? "Copiada!" : "Copiar chave"}
+          </button>
+        </div>
+
+        {sucesso && <p className="inst-sucesso">{sucesso}</p>}
+        {erro && <p className="erro-geral">{erro}</p>}
+
+        {!minhaInstituicao && !abrirForm && (
+          <button
+            type="button"
+            className="inst-pix-botao"
+            onClick={() => {
+              setSucesso("");
+              setAbrirForm(true);
+            }}
+          >
+            Informar doação
+          </button>
+        )}
+
+        {!minhaInstituicao && abrirForm && (
+          <form className="inst-pix-form" onSubmit={enviar}>
+            <label>
+              Valor doado (R$)
+              <input
+                type="text"
+                inputMode="decimal"
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
+                placeholder="Ex.: 50,00"
+              />
+            </label>
+            <label>
+              Mensagem (opcional)
+              <textarea
+                value={mensagem}
+                onChange={(e) => setMensagem(e.target.value)}
+                maxLength={300}
+                rows={3}
+                placeholder="Ex.: Para a compra de livros da biblioteca"
+              />
+            </label>
+            <div className="inst-pix-acoes">
+              <button type="submit" disabled={enviando}>
+                {enviando ? "Enviando..." : "Registrar doação"}
+              </button>
+              <button type="button" className="inst-pix-cancelar" onClick={() => setAbrirForm(false)}>
+                Cancelar
+              </button>
+            </div>
+            <p className="inst-pix-aviso">
+              O pagamento é feito pelo seu banco. Aqui você apenas registra a doação para a escola acompanhar.
+            </p>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function InstituicaoDetalhePage() {
   const { id } = useParams();
   const [detalhe, setDetalhe] = useState(null);
@@ -63,6 +176,15 @@ export default function InstituicaoDetalhePage() {
               <dd>{detalhe.email}</dd>
             </dl>
           </section>
+
+          {detalhe.chavePix && (
+            <DoacaoPix
+              instituicaoId={detalhe.id}
+              nomeEscola={detalhe.nome}
+              chavePix={detalhe.chavePix}
+              minhaInstituicao={detalhe.minhaInstituicao}
+            />
+          )}
 
           {detalhe.minhaInstituicao && (
             <section className="inst-secao">

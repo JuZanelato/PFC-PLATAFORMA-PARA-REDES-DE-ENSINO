@@ -10,7 +10,7 @@ import com.web.pfc.SpringPfc.domain.Usuario;
 @Service
 public class EmailService {
 
-    private static final String URL_ENVIO = "https://api.brevo.com/v3/smtp/email";
+    private static final String URL_ENVIO = "https://api.sendgrid.com/v3/mail/send";
 
     private final String apiKey;
     private final String remetente;
@@ -18,15 +18,15 @@ public class EmailService {
     private final RestClient http = RestClient.create();
 
     public EmailService(
-            @Value("${brevo.api-key:}") String apiKey,
-            @Value("${brevo.remetente:}") String remetente,
+            @Value("${sendgrid.api-key:}") String apiKey,
+            @Value("${sendgrid.remetente:}") String remetente,
             @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl) {
         this.apiKey = apiKey;
         this.remetente = remetente;
         this.frontendUrl = frontendUrl;
     }
 
-    
+
     public boolean estaConfigurado() {
         return !apiKey.isBlank() && !remetente.isBlank();
     }
@@ -56,7 +56,7 @@ public class EmailService {
         }
         http.post()
                 .uri(URL_ENVIO)
-                .header("api-key", apiKey)
+                .header("Authorization", "Bearer " + apiKey)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(montarCorpo(remetente, para, assunto, html))
@@ -64,13 +64,13 @@ public class EmailService {
                 .toBodilessEntity();
     }
 
-
+    
     static String montarCorpo(String de, String para, String assunto, String html) {
         return "{"
-                + "\"sender\":{\"name\":\"CompartilhaEdu\",\"email\":\"" + json(de) + "\"},"
-                + "\"to\":[{\"email\":\"" + json(para) + "\"}],"
+                + "\"personalizations\":[{\"to\":[{\"email\":\"" + json(para) + "\"}]}],"
+                + "\"from\":{\"email\":\"" + json(de) + "\",\"name\":\"CompartilhaEdu\"},"
                 + "\"subject\":\"" + json(assunto) + "\","
-                + "\"htmlContent\":\"" + json(html) + "\""
+                + "\"content\":[{\"type\":\"text/html\",\"value\":\"" + json(html) + "\"}]"
                 + "}";
     }
 

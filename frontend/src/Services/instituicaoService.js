@@ -34,6 +34,17 @@ const instituicaoService = {
   atualizar: async (id, instituicao) => {
     await api.put(`/Instituicao/${id}`, instituicao);
   },
+
+
+  informarDoacao: async (id, doacao) => {
+    const { data } = await api.post(`/Instituicao/${id}/doacoes`, doacao);
+    return data;
+  },
+
+  doacoesRecebidas: async () => {
+    const { data } = await api.get("/Instituicao/minha/doacoes");
+    return data;
+  },
 };
 
 export default instituicaoService;

@@ -96,6 +96,79 @@ function MinhaInstituicao() {
   );
 }
 
+
+function DoacoesRecebidas() {
+  const [doacoes, setDoacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
+  useEffect(() => {
+    let telaAberta = true;
+    instituicaoService
+      .doacoesRecebidas()
+      .then((dados) => {
+        if (telaAberta) setDoacoes(dados);
+      })
+      .catch((err) => {
+        if (telaAberta) setErro(mensagemDeErro(err, "Não foi possível carregar as doações."));
+      })
+      .finally(() => {
+        if (telaAberta) setCarregando(false);
+      });
+    return () => {
+      telaAberta = false;
+    };
+  }, []);
+
+  const total = doacoes.reduce((soma, d) => soma + Number(d.valor), 0);
+  const moeda = (v) => Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  return (
+    <section className="inst-secao">
+      <div className="inst-secao-cabecalho">
+        <h2>Doações recebidas</h2>
+        {doacoes.length > 0 && <span className="inst-total">Total informado: {moeda(total)}</span>}
+      </div>
+      <p className="inst-dica">
+        Doações via Pix informadas por outras escolas da rede. Confira os valores no extrato da conta.
+      </p>
+
+      {erro && <p className="erro-geral">{erro}</p>}
+
+      {carregando ? (
+        <p>Carregando...</p>
+      ) : doacoes.length === 0 ? (
+        <p className="inst-vazio">Nenhuma doação informada até o momento.</p>
+      ) : (
+        <div className="inst-tabela-wrap">
+          <table className="instituicao-tabela">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Escola</th>
+                <th>Informada por</th>
+                <th>Valor</th>
+                <th>Mensagem</th>
+              </tr>
+            </thead>
+            <tbody>
+              {doacoes.map((d) => (
+                <tr key={d.id}>
+                  <td>{new Date(d.dataHora).toLocaleDateString("pt-BR")}</td>
+                  <td>{d.instituicaoDoadora}</td>
+                  <td>{d.doadorNome}</td>
+                  <td>{moeda(d.valor)}</td>
+                  <td>{d.mensagem || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function InstituicoesDaRede() {
   const [instituicoes, setInstituicoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -191,9 +264,8 @@ export default function InstituicaoPages() {
       </header>
 
       {ehDiretor && <MinhaInstituicao />}
+      {ehDiretor && <DoacoesRecebidas />}
       <InstituicoesDaRede />
     </div>
   );
-
-  
 }

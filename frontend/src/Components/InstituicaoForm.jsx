@@ -94,6 +94,9 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
         ? "Endereço é obrigatório"
         : "Endereço não encontrado — confira o CEP digitado";
 
+    if (form.chavePix && form.chavePix.trim().length > 77)
+      novosErros.chavePix = "A chave Pix deve ter no máximo 77 caracteres";
+
     if (!form.email?.trim()) novosErros.email = "E-mail é obrigatório";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       novosErros.email = "E-mail inválido";
@@ -243,6 +246,21 @@ export default function InstituicaoForm({ instituicaoSelecionada, onSalvar, onCa
           placeholder="contato@suainstituicao.edu.br"
         />
         {erros.email && <span className="erro-campo">{erros.email}</span>}
+      </label>
+
+      <label>
+        Chave Pix (opcional)
+        <input
+          type="text"
+          value={form.chavePix || ""}
+          onChange={handleChange("chavePix")}
+          maxLength={77}
+          placeholder="CNPJ, e-mail, telefone ou chave aleatória"
+        />
+        <span className="campo-dica">
+          Aparece para as outras escolas da rede, que podem usá-la para fazer doações.
+        </span>
+        {erros.chavePix && <span className="erro-campo">{erros.chavePix}</span>}
       </label>
 
       {!esconderStatus && (

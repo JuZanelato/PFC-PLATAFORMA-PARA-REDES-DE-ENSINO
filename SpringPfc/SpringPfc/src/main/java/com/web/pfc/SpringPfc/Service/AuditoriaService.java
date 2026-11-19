@@ -30,7 +30,7 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "INSTITUICAO_CRIADA:" + instituicaoId);
     }
 
-        public void registrarCriacaoInstituicao(String responsavel, Long instituicaoId) {
+    public void registrarCriacaoInstituicao(String responsavel, Long instituicaoId) {
         salvar(responsavel, "INSTITUICAO_CRIADA:" + instituicaoId);
     }
 
@@ -46,7 +46,7 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "INSTITUICAO_INATIVADA:" + instituicaoId);
     }
 
-        public void registrarAprovacaoUsuario(Usuario diretor, Long usuarioId) {
+    public void registrarAprovacaoUsuario(Usuario diretor, Long usuarioId) {
         salvar(diretor.getEmail(), "USUARIO_APROVADO:" + usuarioId);
     }
 
@@ -60,6 +60,11 @@ public class AuditoriaService {
 
     public void registrarRemocaoPix(Usuario usuario, Long instituicaoId) {
         salvar(usuario.getEmail(), "PIX_REMOVIDA:" + instituicaoId);
+    }
+
+    // NOVO: doação via Pix informada por um usuário de outra escola
+    public void registrarDoacaoInformada(Usuario usuario, Long doacaoId) {
+        salvar(usuario.getEmail(), "DOACAO_INFORMADA:" + doacaoId);
     }
 
     public void registrarCriacaoUsuario(String emailResponsavel, String emailCriado) {
@@ -102,7 +107,7 @@ public class AuditoriaService {
         salvar(usuario.getEmail(), "RECURSO_DISPONIBILIDADE_ALTERADA:" + recursoId + ":" + disponivel);
     }
 
-        public void registrarAlteracaoDadosProprios(Usuario usuario, boolean trocouSenha) {
+    public void registrarAlteracaoDadosProprios(Usuario usuario, boolean trocouSenha) {
         salvar(usuario.getEmail(), trocouSenha ? "DADOS_PROPRIOS_E_SENHA_ALTERADOS" : "DADOS_PROPRIOS_ALTERADOS");
     }
 }

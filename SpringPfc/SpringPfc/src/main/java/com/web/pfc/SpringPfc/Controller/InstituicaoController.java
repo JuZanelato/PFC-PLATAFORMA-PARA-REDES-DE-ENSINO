@@ -71,6 +71,7 @@ public class InstituicaoController {
 
                 instituicao.setId(null);
                 instituicao.setCnpj(cnpj);
+                instituicao.setChavePix(limparPix(instituicao.getChavePix()));
                 instituicao.setStatus(StatusInst.ATIVA);
                 instituicao.setCadastradoPor(responsavel);
                 instituicao.setCriadoEm(LocalDateTime.now());
@@ -98,7 +99,7 @@ public class InstituicaoController {
                 return buscarOuFalhar(id);
         }
 
-        
+
         @PutMapping("{id}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
         @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -115,14 +116,26 @@ public class InstituicaoController {
                         throw new NegocioException("Já existe uma instituição cadastrada com este CNPJ.");
                 }
 
+                String pixAnterior = existente.getChavePix();
+
                 instituicao.setId(existente.getId());
                 instituicao.setCnpj(cnpj);
+                instituicao.setChavePix(limparPix(instituicao.getChavePix()));
                 instituicao.setStatus(existente.getStatus());
                 instituicao.setCadastradoPor(existente.getCadastradoPor());
                 instituicao.setCriadoEm(existente.getCriadoEm());
 
                 instituicaorep.save(instituicao);
                 auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
+
+                // NOVO: registra na auditoria quando a chave Pix é alterada ou removida
+                if (!Objects.equals(pixAnterior, instituicao.getChavePix())) {
+                        if (instituicao.getChavePix() == null) {
+                                auditoriaService.registrarRemocaoPix(usuarioLogado, id);
+                        } else {
+                                auditoriaService.registrarAlteracaoPix(usuarioLogado, id);
+                        }
+                }
         }
 
 
@@ -164,7 +177,8 @@ public class InstituicaoController {
                                 .toList();
 
                 return new InstituicaoDetalheDTO(instituicao.getId(), instituicao.getNome(), instituicao.getEndereco(),
-                                instituicao.getNumero(), instituicao.getCep(), instituicao.getEmail(), minha,
+                                instituicao.getNumero(), instituicao.getCep(), instituicao.getEmail(),
+                                instituicao.getChavePix(), minha,
                                 usuarios, recursos);
         }
 
@@ -175,6 +189,11 @@ public class InstituicaoController {
                                 .filter(i -> i.getStatus() != StatusInst.INATIVA)
                                 .map(i -> new InstituicaoResumoDTO(i.getId(), i.getNome()))
                                 .toList();
+        }
+
+        // NOVO: chave Pix vazia vira null e espaços nas pontas são removidos
+        private String limparPix(String chavePix) {
+                return (chavePix == null || chavePix.isBlank()) ? null : chavePix.trim();
         }
 
         private Instituicao buscarOuFalhar(Long id) {

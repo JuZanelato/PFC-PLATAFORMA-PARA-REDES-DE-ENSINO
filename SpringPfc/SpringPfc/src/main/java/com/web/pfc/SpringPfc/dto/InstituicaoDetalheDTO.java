@@ -9,6 +9,7 @@ public record InstituicaoDetalheDTO(
         String numero,
         String cep,
         String email,
+        String chavePix,
         boolean minhaInstituicao,
         List<UsuarioDaEscola> usuarios,
         List<RecursoDaEscola> recursos) {

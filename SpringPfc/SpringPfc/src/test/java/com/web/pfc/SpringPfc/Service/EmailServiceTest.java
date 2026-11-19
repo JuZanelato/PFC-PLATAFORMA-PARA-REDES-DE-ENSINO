@@ -25,13 +25,13 @@ class EmailServiceTest {
     }
 
     @Test
-    void deveMontarOCorpoNoFormatoDoBrevo() {
+    void deveMontarOCorpoNoFormatoDoSendGrid() {
         String corpo = EmailService.montarCorpo("sistema@teste.com", "ana@teste.com", "Recuperação de senha",
                 "<a href=\"http://x\">Link</a>\n");
 
-        assertEquals("{\"sender\":{\"name\":\"CompartilhaEdu\",\"email\":\"sistema@teste.com\"},"
-                + "\"to\":[{\"email\":\"ana@teste.com\"}],"
+        assertEquals("{\"personalizations\":[{\"to\":[{\"email\":\"ana@teste.com\"}]}],"
+                + "\"from\":{\"email\":\"sistema@teste.com\",\"name\":\"CompartilhaEdu\"},"
                 + "\"subject\":\"Recuperação de senha\","
-                + "\"htmlContent\":\"<a href=\\\"http://x\\\">Link</a>\\n\"}", corpo);
+                + "\"content\":[{\"type\":\"text/html\",\"value\":\"<a href=\\\"http://x\\\">Link</a>\\n\"}]}", corpo);
     }
 }

@@ -73,8 +73,8 @@ export default function PoliticaPrivacidadePage() {
           <li>Avisos sobre solicitações de empréstimo: nova solicitação, aprovação, recusa e lembretes de devolução.</li>
         </ul>
         <p>
-          Os e-mails são enviados pelo serviço Brevo, empresa sediada na União Europeia, que recebe apenas o
-          endereço do destinatário e o conteúdo da mensagem. Não enviamos propagandas.
+          Os e-mails são enviados pelo serviço SendGrid, da empresa Twilio, sediada nos Estados Unidos, que recebe
+          apenas o endereço do destinatário e o conteúdo da mensagem. Não enviamos propagandas.
         </p>
       </section>
 
@@ -113,9 +113,9 @@ export default function PoliticaPrivacidadePage() {
           visíveis para as instituições da mesma rede de ensino, para permitir o empréstimo entre escolas.
         </p>
         <p>
-          Quando um usuário faz uma solicitação de empréstimo, a instituição dona do recurso vê o nome da escola
-          solicitante e a justificativa informada, para que possa responder ao pedido. O nome, o e-mail e a senha
-          de quem fez o pedido não são mostrados a outras instituições.
+          Quando um usuário faz uma solicitação de empréstimo, o seu nome e a justificativa informada ficam
+          visíveis para a instituição dona do recurso, para que ela possa responder ao pedido. O e-mail e a senha
+          dos usuários não são mostrados a outras instituições.
         </p>
         <p>
           Fora da rede de ensino, os dados não são compartilhados com terceiros, exceto com o serviço de envio de
