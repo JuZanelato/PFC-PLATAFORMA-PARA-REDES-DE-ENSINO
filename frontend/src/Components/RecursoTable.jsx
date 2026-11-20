@@ -1,4 +1,5 @@
 import { CATEGORIA_OPTIONS, CONDICAO_OPTIONS } from "../Services/recursoService";
+import EstadoVazio from "./EstadoVazio";
 
 const labelDe = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label || valor;
 
@@ -10,7 +11,12 @@ export default function RecursoTable({
   onAlternarDisponibilidade,
 }) {
   if (recursos.length === 0) {
-    return <p className="recurso-vazio">Nenhum recurso encontrado.</p>;
+    return (
+      <EstadoVazio
+        titulo="Nenhum recurso cadastrado"
+        texto="Cadastre os materiais que a sua escola pode emprestar para a rede."
+      />
+    );
   }
 
   return (

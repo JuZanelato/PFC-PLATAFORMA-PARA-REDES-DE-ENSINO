@@ -4,11 +4,12 @@ import solicitacaoService, {
     STATUS_SOLICITACAO,
     formatarData,
     formatarDataHora,
-} from "../Services/solicitacaoService";
+} from "../Services/SolicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import StatusBadge from "../Components/StatusBadge";
 import "./RecursosPage.css";
 import "./SolicitacoesPage.css";
+import EstadoVazio from "../Components/EstadoVazio";
 
 
 export default function SolicitacoesPage() {
@@ -204,7 +205,7 @@ export default function SolicitacoesPage() {
             {carregando ? (
                 <p>Carregando...</p>
             ) : solicitacoes.length === 0 ? (
-                <p className="recurso-vazio">Nenhuma solicitação encontrada.</p>
+                <EstadoVazio titulo="Nenhuma solicitação por aqui" texto="Quando houver pedidos de empréstimo, eles aparecem nesta lista." />
             ) : (
                 <table className="recurso-tabela">
                     <thead>

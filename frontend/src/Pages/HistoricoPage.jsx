@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import solicitacaoService, {
     STATUS_SOLICITACAO,
     formatarDataHora,
-} from "../Services/solicitacaoService";
+} from "../Services/SolicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import StatusBadge from "../Components/StatusBadge";
 import "./RecursosPage.css";
 import "./SolicitacoesPage.css";
+import EstadoVazio from "../Components/EstadoVazio";
 
 
 export default function HistoricoPage() {
@@ -74,7 +75,7 @@ export default function HistoricoPage() {
             {carregando ? (
                 <p>Carregando...</p>
             ) : filtradas.length === 0 ? (
-                <p className="recurso-vazio">Nenhuma movimentação encontrada.</p>
+                <EstadoVazio titulo="Nenhuma movimentação ainda" texto="O histórico mostra cada etapa dos empréstimos: pedido, aprovação, retirada e devolução." />
             ) : (
                 <table className="recurso-tabela">
                     <thead>

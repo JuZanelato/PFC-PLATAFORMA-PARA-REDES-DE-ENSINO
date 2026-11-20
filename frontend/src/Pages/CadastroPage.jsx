@@ -5,6 +5,7 @@ import instituicaoService from "../Services/instituicaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import { PERFIL_LABEL } from "../Services/usuarioService";
 import InstituicaoForm from "../Components/InstituicaoForm";
+import { LogoMarca } from "../Components/Logo";
 import "./InstituicoesPages.css";
 import "./CadastroPage.css";
 
@@ -135,6 +136,7 @@ export default function CadastroPage() {
       <div className="cadastro-page">
         <div className="cadastro-form">
           <header className="cad-cabecalho">
+            <LogoMarca tamanho={44} />
             <p className="cad-marca">CompartilhaEdu</p>
             <h1>Cadastrar usuário</h1>
           </header>
@@ -153,6 +155,7 @@ export default function CadastroPage() {
       <div className="cadastro-page">
         <div className="cadastro-form">
           <header className="cad-cabecalho">
+            <LogoMarca tamanho={44} />
             <p className="cad-marca">CompartilhaEdu</p>
             <h1>Cadastro enviado</h1>
           </header>
@@ -171,6 +174,7 @@ export default function CadastroPage() {
       <div className="cadastro-page">
         <div className="cad-instituicao">
           <header className="cad-cabecalho">
+            <LogoMarca tamanho={44} />
             <p className="cad-marca">CompartilhaEdu</p>
             <h1>Cadastrar instituição</h1>
           </header>
@@ -190,6 +194,7 @@ export default function CadastroPage() {
     <div className="cadastro-page">
       <form className="cadastro-form" onSubmit={handleSubmit}>
         <header className="cad-cabecalho">
+          <LogoMarca tamanho={44} />
           <p className="cad-marca">CompartilhaEdu</p>
           <h1>{diretorLogado ? "Cadastrar usuário" : "Criar conta"}</h1>
         </header>

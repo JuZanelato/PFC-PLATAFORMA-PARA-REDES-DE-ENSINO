@@ -5,6 +5,7 @@ import instituicaoService from "../Services/instituicaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import InstituicaoForm from "../Components/InstituicaoForm";
 import "./InstituicoesPages.css";
+import EstadoVazio from "../Components/EstadoVazio";
 
 function MinhaInstituicao() {
   const [instituicao, setInstituicao] = useState(null);
@@ -138,7 +139,7 @@ function DoacoesRecebidas() {
       {carregando ? (
         <p>Carregando...</p>
       ) : doacoes.length === 0 ? (
-        <p className="inst-vazio">Nenhuma doação informada até o momento.</p>
+        <EstadoVazio titulo="Nenhuma doação informada" texto="Cadastre a chave Pix da escola em Editar dados para receber doações da rede." />
       ) : (
         <div className="inst-tabela-wrap">
           <table className="instituicao-tabela">

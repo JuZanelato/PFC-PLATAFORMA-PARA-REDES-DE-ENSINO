@@ -4,10 +4,12 @@ import instituicaoService from "../Services/instituicaoService";
 import { CATEGORIA_OPTIONS, CONDICAO_OPTIONS } from "../Services/recursoService";
 import { PERFIL_LABEL } from "../Services/usuarioService";
 import { mensagemDeErro } from "../Services/mensagemErro";
+import { IlustracaoDoacao } from "../Components/Ilustracao";
+import Icone from "../Components/Icone";
 import "./InstituicoesPages.css";
+import EstadoVazio from "../Components/EstadoVazio";
 
 const rotulo = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label || valor;
-
 function DoacaoPix({ instituicaoId, nomeEscola, chavePix, minhaInstituicao }) {
   const [copiado, setCopiado] = useState(false);
   const [abrirForm, setAbrirForm] = useState(false);
@@ -52,6 +54,7 @@ function DoacaoPix({ instituicaoId, nomeEscola, chavePix, minhaInstituicao }) {
   return (
     <section className="inst-secao">
       <div className="inst-pix">
+        <IlustracaoDoacao className="inst-pix-img" />
         <h2>{minhaInstituicao ? "Chave Pix da sua escola" : `Apoie a ${nomeEscola}`}</h2>
         <p className="inst-pix-texto">
           {minhaInstituicao
@@ -61,7 +64,7 @@ function DoacaoPix({ instituicaoId, nomeEscola, chavePix, minhaInstituicao }) {
         <div className="inst-pix-chave">
           <code>{chavePix}</code>
           <button type="button" className="btn-copiar" onClick={copiar}>
-            {copiado ? "Copiada!" : "Copiar chave"}
+            <Icone nome="copiar" tamanho={14} /> {copiado ? "Copiada!" : "Copiar chave"}
           </button>
         </div>
 
@@ -77,7 +80,7 @@ function DoacaoPix({ instituicaoId, nomeEscola, chavePix, minhaInstituicao }) {
               setAbrirForm(true);
             }}
           >
-            Informar doação
+            <Icone nome="coracao" tamanho={16} /> Informar doação
           </button>
         )}
 
@@ -217,7 +220,7 @@ export default function InstituicaoDetalhePage() {
           <section className="inst-secao">
             <h2>Recursos vinculados ({detalhe.recursos.length})</h2>
             {detalhe.recursos.length === 0 ? (
-              <p className="inst-vazio">Esta unidade ainda não cadastrou recursos.</p>
+              <EstadoVazio titulo="Nenhum recurso cadastrado" texto="Esta unidade ainda não cadastrou recursos para compartilhar." />
             ) : (
               <div className="inst-tabela-wrap">
                 <table className="instituicao-tabela">
