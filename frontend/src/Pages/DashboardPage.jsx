@@ -2,17 +2,26 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import dashboardService from "../Services/dashboardService";
 import { CATEGORIA_OPTIONS } from "../Services/recursoService";
-import { STATUS_SOLICITACAO } from "../Services/solicitacaoService";
+import { STATUS_SOLICITACAO } from "../Services/SolicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import GraficoBarras from "../Components/GraficoBarras";
+import authService from "../Services/authService";
+import Icone from "../Components/Icone";
+import { IlustracaoRede } from "../Components/Ilustracao";
+import "../Components/Visual.css";
 import "./DashboardPage.css";
 
 const rotuloCategoria = (c) => CATEGORIA_OPTIONS.find((o) => o.value === c)?.label || c;
 const rotuloStatus = (s) => STATUS_SOLICITACAO[s]?.label || s;
 
-function Indicador({ titulo, valor, detalhe, destaque }) {
+function Indicador({ titulo, valor, detalhe, destaque, icone }) {
   return (
     <div className={`dash-card dash-indicador ${destaque ? "destaque" : ""}`}>
+      {icone && (
+        <span className="dash-indicador-icone">
+          <Icone nome={icone} tamanho={20} />
+        </span>
+      )}
       <span className="dash-indicador-titulo">{titulo}</span>
       <span className="dash-indicador-valor">{valor}</span>
       {detalhe && <span className="dash-indicador-detalhe">{detalhe}</span>}
@@ -61,6 +70,21 @@ export default function DashboardPage() {
         </button>
       </header>
 
+      {}
+      <section className="dash-boasvindas">
+        <div>
+          <p className="dash-boasvindas-ola">Olá, {authService.usuarioLogado()?.nome?.split(" ")[0] || "bem-vindo(a)"}!</p>
+          <p>
+            Acompanhe como os recursos estão circulando entre as escolas da rede. Cada empréstimo é um material a
+            mais chegando a quem precisa.
+          </p>
+          <Link to="/rede" className="dash-boasvindas-link">
+            <Icone nome="busca" tamanho={16} /> Buscar recursos na rede
+          </Link>
+        </div>
+        <IlustracaoRede className="dash-boasvindas-img" />
+      </section>
+
       {(dados.pendentesParaMinhaAprovacao > 0 || dados.minhasSolicitacoesEmAndamento > 0) && (
         <div className="dash-alerta">
           <span>
@@ -75,27 +99,32 @@ export default function DashboardPage() {
       <div className="dash-indicadores">
         <Indicador
           titulo="Recursos ativos na rede"
+          icone="recursos"
           valor={dados.totalRecursos}
           detalhe={`${dados.instituicoesAtivas} instituição(ões) ativa(s)`}
           destaque
         />
         <Indicador
           titulo="Disponíveis"
+          icone="check"
           valor={dados.recursosDisponiveis}
           detalhe={`${dados.recursosIndisponiveis} indisponível(is)`}
         />
         <Indicador
           titulo="Unidades emprestadas"
+          icone="solicitacoes"
           valor={dados.unidadesEmprestadas}
           detalhe="aprovadas ou retiradas"
         />
         <Indicador
           titulo="Solicitações pendentes"
+          icone="relogio"
           valor={dados.solicitacoesPendentes}
           detalhe={`de ${dados.totalSolicitacoes} no total`}
         />
         <Indicador
           titulo="Empréstimos concluídos"
+          icone="historico"
           valor={dados.solicitacoesConcluidas}
           detalhe="com devolução registrada"
         />
