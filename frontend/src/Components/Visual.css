@@ -1,0 +1,57 @@
+.icone {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.logo-nome {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.logo-nome strong {
+  font-weight: 800;
+}
+
+.estado-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed #e3d3da;
+  border-radius: 10px;
+  background: #fdfafb;
+}
+
+.estado-vazio-img {
+  width: 140px;
+  height: auto;
+  margin-bottom: 0.4rem;
+}
+
+.estado-vazio-titulo {
+  margin: 0;
+  font-weight: 600;
+  color: #3d3542;
+}
+
+.estado-vazio-texto {
+  margin: 0;
+  max-width: 420px;
+  font-size: 0.88rem;
+  color: #6b6375;
+}
+
+.selo-categoria {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}

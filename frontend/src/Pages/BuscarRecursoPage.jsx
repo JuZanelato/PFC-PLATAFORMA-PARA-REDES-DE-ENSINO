@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import recursoService, { CATEGORIA_OPTIONS, CONDICAO_OPTIONS } from "../Services/recursoService";
 import instituicaoService from "../Services/instituicaoService";
-import solicitacaoService from "../Services/solicitacaoService";
+import solicitacaoService from "../Services/SolicitacaoService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import SolicitacaoForm from "../Components/SolicitacaoForm";
+import Icone, { VISUAL_CATEGORIA } from "../Components/Icone";
+import EstadoVazio from "../Components/EstadoVazio";
 import "./RecursosPage.css";
 import "./SolicitacoesPage.css";
 
@@ -66,7 +68,9 @@ export default function BuscarRecursosPage() {
     return (
         <div className="recurso-page">
             <header className="recurso-page-header">
-                <h1>Buscar recursos na rede</h1>
+                <h1>
+                    <Icone nome="busca" tamanho={28} className="titulo-icone" /> Buscar recursos na rede
+                </h1>
             </header>
 
             <p className="recurso-aviso">
@@ -120,43 +124,53 @@ export default function BuscarRecursosPage() {
             {carregando ? (
                 <p>Carregando...</p>
             ) : recursos.length === 0 ? (
-                <p className="recurso-vazio">Nenhum recurso disponível encontrado com esses filtros.</p>
+                <EstadoVazio
+                    titulo="Nenhum recurso encontrado"
+                    texto="Tente outro nome, categoria ou instituição. Novos recursos aparecem aqui assim que as escolas da rede os cadastram."
+                />
             ) : (
-                <table className="recurso-tabela">
-                    <thead>
-                        <tr>
-                            <th>Recurso</th>
-                            <th>Categoria</th>
-                            <th>Condição</th>
-                            <th>Disponível</th>
-                            <th>Instituição</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {recursos.map((r) => (
-                            <tr key={r.id}>
-                                <td>{r.nome}</td>
-                                <td>{labelDe(CATEGORIA_OPTIONS, r.categoria)}</td>
-                                <td>{labelDe(CONDICAO_OPTIONS, r.condicao)}</td>
-                                <td>{r.quantidade}</td>
-                                <td>{r.instituicaoNome}</td>
-                                <td className="recurso-acoes">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSucesso("");
-                                            setSelecionado(r);
-                                            window.scrollTo({ top: 0, behavior: "smooth" });
-                                        }}
+                
+                <div className="rede-grade">
+                    {recursos.map((r) => {
+                        const visual = VISUAL_CATEGORIA[r.categoria] || VISUAL_CATEGORIA.OUTRO;
+                        return (
+                            <article key={r.id} className="rede-cartao">
+                                <div className="rede-cartao-topo">
+                                    <span
+                                        className="selo-categoria rede-selo"
+                                        style={{ background: visual.fundo, color: visual.cor }}
                                     >
-                                        Solicitar
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                        <Icone nome={visual.icone} tamanho={24} />
+                                    </span>
+                                    <span className="rede-categoria" style={{ color: visual.cor }}>
+                                        {labelDe(CATEGORIA_OPTIONS, r.categoria)}
+                                    </span>
+                                </div>
+                                <h3>{r.nome}</h3>
+                                <p className="rede-escola">
+                                    <Icone nome="instituicoes" tamanho={15} /> {r.instituicaoNome}
+                                </p>
+                                <div className="rede-info">
+                                    <span>
+                                        <strong>{r.quantidade}</strong> disponível(is)
+                                    </span>
+                                    <span className="rede-condicao">{labelDe(CONDICAO_OPTIONS, r.condicao)}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="rede-solicitar"
+                                    onClick={() => {
+                                        setSucesso("");
+                                        setSelecionado(r);
+                                        window.scrollTo({ top: 0, behavior: "smooth" });
+                                    }}
+                                >
+                                    Solicitar <Icone nome="seta" tamanho={16} />
+                                </button>
+                            </article>
+                        );
+                    })}
+                </div>
             )}
         </div>
     );
