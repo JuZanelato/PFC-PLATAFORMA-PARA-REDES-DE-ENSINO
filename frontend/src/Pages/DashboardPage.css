@@ -4,7 +4,7 @@
   --dash-texto: #1f2430;
   --dash-texto-2: #52514e;
   --dash-texto-3: #77757a;
-  --dash-serie: #a8395f; 
+  --dash-serie: #a8395f;
   --dash-trilho: #f2e8eb;
   --dash-grid: #ecebef;
 
@@ -284,4 +284,69 @@
   background: #fdecea;
   padding: 0.6rem 0.9rem;
   border-radius: 4px;
+}
+
+
+.dash-boasvindas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.2rem;
+  padding: 1.3rem 1.5rem;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #7a1f3d 0%, #9a2d52 65%, #b2486d 100%);
+  color: #fbe9ef;
+  text-align: left;
+  overflow: hidden;
+}
+
+.dash-boasvindas p {
+  margin: 0 0 0.6rem;
+  max-width: 520px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.dash-boasvindas-ola {
+  font-size: 1.35rem !important;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dash-boasvindas-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #7a1f3d;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.dash-boasvindas-img {
+  width: 230px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.dash-indicador-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 0.35rem;
+  border-radius: 10px;
+  background: var(--dash-trilho);
+  color: var(--dash-serie);
+}
+
+@media (max-width: 700px) {
+  .dash-boasvindas-img {
+    display: none;
+  }
 }

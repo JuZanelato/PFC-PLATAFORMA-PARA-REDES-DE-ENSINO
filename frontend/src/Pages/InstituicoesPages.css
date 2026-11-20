@@ -269,7 +269,7 @@
   font-style: italic;
 }
 
-/* ===== Ações do cabeçalho (novo) ===== */
+
 .instituicao-page-acoes {
   display: flex;
   align-items: center;
@@ -295,7 +295,6 @@
 .instituicao-page-header .btn-secundario:hover {
   background: #d5d5dd;
 }
-
 
 .inst-secao {
   margin-bottom: 2.5rem;
@@ -387,7 +386,6 @@
 }
 
 
-/* Detalhes da instituição */
 .inst-link {
   color: #7a1f3d;
   font-weight: 600;
@@ -429,7 +427,6 @@
   background: #f1f1f4;
   color: #6b6375;
 }
-
 
 .campo-dica {
   font-size: 0.78rem;
@@ -535,4 +532,30 @@
 .inst-total {
   font-weight: 600;
   color: #1e6b45;
+}
+
+
+.inst-pix {
+  overflow: hidden;
+  text-align: left;
+}
+
+.inst-pix-img {
+  float: right;
+  width: 110px;
+  height: auto;
+  margin: 0 0 0.5rem 1rem;
+}
+
+.inst-pix-botao,
+.btn-copiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (max-width: 600px) {
+  .inst-pix-img {
+    display: none;
+  }
 }
