@@ -5,7 +5,7 @@ export default function PoliticaPrivacidadePage() {
     <div className="politica-page">
       <header>
         <h1>Política de Privacidade</h1>
-        <p className="politica-atualizacao">Última atualização: 14 de novembro de 2026</p>
+        <p className="politica-atualizacao">Última atualização: 19 de novembro de 2026</p>
       </header>
 
       <section>
@@ -113,9 +113,9 @@ export default function PoliticaPrivacidadePage() {
           visíveis para as instituições da mesma rede de ensino, para permitir o empréstimo entre escolas.
         </p>
         <p>
-          Quando um usuário faz uma solicitação de empréstimo, o seu nome e a justificativa informada ficam
-          visíveis para a instituição dona do recurso, para que ela possa responder ao pedido. O e-mail e a senha
-          dos usuários não são mostrados a outras instituições.
+          Quando um usuário faz uma solicitação de empréstimo, a instituição dona do recurso vê o nome da escola
+          solicitante e a justificativa informada, para que possa responder ao pedido. O nome, o e-mail e a senha
+          de quem fez o pedido não são mostrados a outras instituições.
         </p>
         <p>
           Fora da rede de ensino, os dados não são compartilhados com terceiros, exceto com o serviço de envio de
@@ -135,8 +135,10 @@ export default function PoliticaPrivacidadePage() {
         </ul>
         <p>
           O usuário pode consultar os seus dados e corrigir o nome e a senha a qualquer momento pela tela "Meus
-          dados", acessada clicando no próprio nome no menu. Para alterar o e-mail, desativar a conta ou exercer
-          os demais direitos, entre em contato com o diretor da sua instituição.
+          dados", acessada clicando no próprio nome no menu. Na mesma tela, pode pedir a exclusão da conta,
+          confirmando com a senha. A exclusão também pode ser feita pelo diretor da instituição, a pedido do
+          usuário. Para alterar o e-mail ou exercer os demais direitos, entre em contato com o diretor da sua
+          instituição.
         </p>
       </section>
 
@@ -147,6 +149,12 @@ export default function PoliticaPrivacidadePage() {
           inativadas ou com cadastro recusado não são apagadas na hora: ficam desativadas, sem acesso ao sistema,
           para preservar o histórico de empréstimos e a auditoria, pelo período necessário para cumprir
           obrigações legais.
+        </p>
+        <p>
+          Quando a exclusão da conta é pedida, os dados pessoais são <strong>anonimizados</strong>: o nome, o
+          e-mail e a senha são apagados de forma definitiva, e os empréstimos, doações e registros de auditoria
+          passam a aparecer como "Usuário removido", sem identificar a pessoa. A exclusão não é feita enquanto
+          houver empréstimos em andamento solicitados pelo usuário.
         </p>
       </section>
 

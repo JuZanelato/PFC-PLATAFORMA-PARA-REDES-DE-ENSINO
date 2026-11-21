@@ -131,3 +131,59 @@
     grid-template-columns: 1fr;
   }
 }
+
+.md-perigo {
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  border: 1px solid #f1c9c4;
+  border-left: 4px solid #c0392b;
+  border-radius: 8px;
+  background: #fff7f6;
+  text-align: left;
+}
+
+.md-perigo h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: #a5281b;
+}
+
+.md-perigo > p {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #4b5160;
+  line-height: 1.5;
+}
+
+.md-form button.md-btn-perigo,
+.md-btn-perigo {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid #c0392b;
+  border-radius: 4px;
+  background: #c0392b;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.md-form button.md-btn-perigo:hover,
+.md-btn-perigo:hover {
+  background: #a5281b;
+}
+
+.md-perigo-acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.md-form button.md-btn-cancelar {
+  padding: 0.55rem 1.1rem;
+  border: 1px solid #cfcfd8;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #4b5160;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

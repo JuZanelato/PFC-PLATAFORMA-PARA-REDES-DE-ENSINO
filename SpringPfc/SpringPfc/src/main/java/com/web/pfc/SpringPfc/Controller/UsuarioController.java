@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.web.pfc.SpringPfc.dto.AtualizarMeusDadosDTO;
+import com.web.pfc.SpringPfc.dto.ExcluirContaDTO;
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -28,7 +29,15 @@ public class UsuarioController {
             @AuthenticationPrincipal Usuario usuarioLogado) {
         return ResponseEntity.ok(usuarioService.atualizarMeusDados(usuarioLogado, dto));
     }
-    
+
+    // NOVO: o próprio usuário exclui a conta (os dados pessoais são anonimizados)
+    @PostMapping("/me/excluir")
+    public ResponseEntity<Void> excluirMinhaConta(@RequestBody @Valid ExcluirContaDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.excluirMinhaConta(usuarioLogado, dto.senhaAtual());
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<UsuarioRespDTO>> listar(@AuthenticationPrincipal Usuario usuarioLogado) {
@@ -60,5 +69,11 @@ public class UsuarioController {
         usuarioService.inativar(id, usuarioLogado);
         return ResponseEntity.noContent().build();
     }
-    
+
+    @PatchMapping("/{id}/excluir-dados")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<Void> excluirDados(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.excluirDadosDeUsuario(id, usuarioLogado);
+        return ResponseEntity.noContent().build();
+    }
 }

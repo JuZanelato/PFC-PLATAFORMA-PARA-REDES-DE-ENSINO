@@ -1,6 +1,11 @@
 package com.web.pfc.SpringPfc.Service;
 
+import com.web.pfc.SpringPfc.Repository.LogAuditoriaRep;
+import com.web.pfc.SpringPfc.Repository.SolicitacaoRep;
+import com.web.pfc.SpringPfc.Repository.TokenSenhaRep;
 import com.web.pfc.SpringPfc.Repository.UsuarioRep;
+import com.web.pfc.SpringPfc.domain.Perfil;
+import com.web.pfc.SpringPfc.domain.StatusSolicitacao;
 import com.web.pfc.SpringPfc.domain.Usuario;
 import com.web.pfc.SpringPfc.dto.UsuarioRespDTO;
 import com.web.pfc.SpringPfc.exception.NegocioException;
@@ -12,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.web.pfc.SpringPfc.dto.AtualizarMeusDadosDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,13 +25,21 @@ public class UsuarioService {
     private final UsuarioRep usuarioRep;
     private final AuditoriaService auditoriaService;
     private final PasswordEncoder passwordEncoder;
+    private final SolicitacaoRep solicitacaoRep;
+    private final LogAuditoriaRep logAuditoriaRep;
+    private final TokenSenhaRep tokenSenhaRep;
 
-        public UsuarioRespDTO toRespDTO(Usuario usuario) {
+    // NOVO: domínio usado nos e-mails anonimizados (não existe, ninguém recebe nada nele)
+    static final String DOMINIO_ANONIMIZADO = "@anonimizado.local";
+    private static final List<StatusSolicitacao> EM_ANDAMENTO =
+            List.of(StatusSolicitacao.PENDENTE, StatusSolicitacao.APROVADA, StatusSolicitacao.RETIRADA);
+
+    public UsuarioRespDTO toRespDTO(Usuario usuario) {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
                 usuario.getInstituicao().getNome(), usuario.isAtivo(), usuario.isAguardandoAprovacao());
     }
-    
-        public List<UsuarioRespDTO> listarDaInstituicao(Usuario diretor) {
+
+    public List<UsuarioRespDTO> listarDaInstituicao(Usuario diretor) {
         return usuarioRep.findByInstituicao_IdOrderByNomeAsc(diretor.getInstituicao().getId())
                 .stream().map(this::toRespDTO).toList();
     }
@@ -35,7 +49,7 @@ public class UsuarioService {
                 .stream().map(this::toRespDTO).toList();
     }
 
-        public void inativar(Long id, Usuario responsavel) {
+    public void inativar(Long id, Usuario responsavel) {
         Usuario usuario = buscarDaMesmaInstituicao(id, responsavel);
         if (Objects.equals(usuario.getId(), responsavel.getId())) {
             throw new NegocioException("Você não pode inativar a própria conta.");
@@ -44,7 +58,8 @@ public class UsuarioService {
         usuarioRep.save(usuario);
         auditoriaService.registrarInativacaoUsuario(responsavel, id);
     }
-        private Usuario buscarDaMesmaInstituicao(Long id, Usuario diretor) {
+
+    private Usuario buscarDaMesmaInstituicao(Long id, Usuario diretor) {
         Usuario usuario = usuarioRep.findById(id)
                 .orElseThrow(() -> new NegocioException("Usuário não encontrado."));
         if (!Objects.equals(usuario.getInstituicao().getId(), diretor.getInstituicao().getId())) {
@@ -98,5 +113,59 @@ public class UsuarioService {
         usuarioRep.save(usuario);
         auditoriaService.registrarAlteracaoDadosProprios(usuario, trocouSenha);
         return toRespDTO(usuario);
+    }
+
+    @Transactional
+    public void excluirMinhaConta(Usuario usuarioLogado, String senhaAtual) {
+        Usuario usuario = usuarioRep.findById(usuarioLogado.getId())
+                .orElseThrow(() -> new NegocioException("Usuário não encontrado."));
+
+        if (senhaAtual == null || !passwordEncoder.matches(senhaAtual, usuario.getSenhaHash())) {
+            throw new NegocioException("A senha atual está incorreta.");
+        }
+        if (usuario.getPerfil() == Perfil.ADMINISTRADOR
+                && usuarioRep.countByInstituicao_IdAndPerfilAndAtivoTrue(
+                        usuario.getInstituicao().getId(), Perfil.ADMINISTRADOR) <= 1) {
+            throw new NegocioException("Você é o único diretor desta escola. Para excluir a sua conta, "
+                    + "a escola precisa antes de outro diretor responsável.");
+        }
+
+        String emailAnonimizado = anonimizar(usuario);
+        auditoriaService.registrarAnonimizacaoUsuario(emailAnonimizado, usuario.getId());
+    }
+
+    @Transactional
+    public void excluirDadosDeUsuario(Long id, Usuario diretor) {
+        Usuario usuario = buscarDaMesmaInstituicao(id, diretor);
+        if (Objects.equals(usuario.getId(), diretor.getId())) {
+            throw new NegocioException("Para excluir a sua própria conta, use a tela Meus dados.");
+        }
+
+        anonimizar(usuario);
+        auditoriaService.registrarAnonimizacaoUsuario(diretor.getEmail(), usuario.getId());
+    }
+
+    private String anonimizar(Usuario usuario) {
+        if (usuario.getEmail().endsWith(DOMINIO_ANONIMIZADO)) {
+            throw new NegocioException("Os dados deste usuário já foram excluídos.");
+        }
+        if (solicitacaoRep.existsBySolicitante_IdAndStatusIn(usuario.getId(), EM_ANDAMENTO)) {
+            throw new NegocioException("Existem empréstimos em andamento (pendentes, aprovados ou retirados) "
+                    + "feitos por este usuário. Conclua ou cancele esses empréstimos antes de excluir os dados.");
+        }
+
+        String emailAntigo = usuario.getEmail();
+        String emailAnonimizado = "removido-" + usuario.getId() + DOMINIO_ANONIMIZADO;
+
+        usuario.setNome("Usuário removido");
+        usuario.setEmail(emailAnonimizado);
+        usuario.setSenhaHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+        usuario.setAtivo(false);
+        usuario.setAguardandoAprovacao(false);
+        usuarioRep.save(usuario);
+
+        logAuditoriaRep.anonimizarEmail(emailAntigo, emailAnonimizado);
+        tokenSenhaRep.deleteByUsuario_Id(usuario.getId());
+        return emailAnonimizado;
     }
 }

@@ -14,8 +14,9 @@ public interface UsuarioRep extends JpaRepository<Usuario, Long> {
 
     boolean existsByInstituicao_IdAndPerfilAndAtivoTrue(Long instituicaoId, Perfil perfil);
 
+    long countByInstituicao_IdAndPerfilAndAtivoTrue(Long instituicaoId, Perfil perfil);
+
     List<Usuario> findByInstituicao_IdOrderByNomeAsc(Long instituicaoId);
 
     List<Usuario> findByInstituicao_IdAndAguardandoAprovacaoTrueOrderByCriadoEmAsc(Long instituicaoId);
 }
-

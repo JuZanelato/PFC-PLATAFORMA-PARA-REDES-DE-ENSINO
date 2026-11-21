@@ -4,6 +4,7 @@ import com.web.pfc.SpringPfc.domain.LogAuditoria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,4 +17,8 @@ public interface LogAuditoriaRep extends JpaRepository<LogAuditoria, Long> {
             countQuery = "SELECT COUNT(l) FROM LogAuditoria l WHERE l.emailUsuario IN "
             + "(SELECT u.email FROM Usuario u WHERE u.instituicao.id = :instituicaoId)")
     Page<LogAuditoria> buscarDaInstituicao(@Param("instituicaoId") Long instituicaoId, Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE LogAuditoria l SET l.emailUsuario = :novoEmail WHERE l.emailUsuario = :emailAntigo")
+    int anonimizarEmail(@Param("emailAntigo") String emailAntigo, @Param("novoEmail") String novoEmail);
 }

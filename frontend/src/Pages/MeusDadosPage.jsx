@@ -16,6 +16,31 @@ export default function MeusDadosPage() {
   const [mensagem, setMensagem] = useState("");
   const [salvando, setSalvando] = useState(false);
 
+  // NOVO: exclusão da própria conta
+  const [abrirExclusao, setAbrirExclusao] = useState(false);
+  const [senhaExclusao, setSenhaExclusao] = useState("");
+  const [entendi, setEntendi] = useState(false);
+  const [erroExclusao, setErroExclusao] = useState("");
+  const [excluindo, setExcluindo] = useState(false);
+
+  const handleExcluir = async (e) => {
+    e.preventDefault();
+    setErroExclusao("");
+    if (!senhaExclusao) return setErroExclusao("Informe a sua senha para confirmar.");
+    if (!entendi) return setErroExclusao("Marque a confirmação de que entendeu que a exclusão é definitiva.");
+
+    setExcluindo(true);
+    try {
+      await usuarioService.excluirMinhaConta(senhaExclusao);
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      window.location.href = "/login";
+    } catch (err) {
+      setErroExclusao(mensagemDeErro(err, "Não foi possível excluir a sua conta."));
+      setExcluindo(false);
+    }
+  };
+
   const validar = () => {
     const novosErros = {};
     if (!nome.trim()) novosErros.nome = "Nome é obrigatório";
@@ -117,9 +142,58 @@ export default function MeusDadosPage() {
       </form>
 
       <p className="md-rodape">
-        O e-mail é usado para entrar no sistema e não pode ser alterado aqui. Para mudar o e-mail ou excluir a sua
-        conta, fale com o diretor da sua escola.
+        O e-mail é usado para entrar no sistema e não pode ser alterado aqui. Para mudar o e-mail, fale com o
+        diretor da sua escola.
       </p>
+
+      <section className="md-perigo">
+        <h2>Excluir minha conta</h2>
+        <p>
+          Seu nome, e-mail e senha serão apagados de forma definitiva e você não poderá mais entrar no sistema. Os
+          empréstimos e doações já registrados continuam no histórico das escolas, mas aparecem como{" "}
+          <strong>"Usuário removido"</strong>, sem identificar você.
+        </p>
+
+        {!abrirExclusao ? (
+          <button type="button" className="md-btn-perigo" onClick={() => setAbrirExclusao(true)}>
+            Quero excluir minha conta
+          </button>
+        ) : (
+          <form className="md-form" onSubmit={handleExcluir}>
+            {erroExclusao && <p className="md-erro">{erroExclusao}</p>}
+            <label>
+              Confirme com a sua senha
+              <input
+                type="password"
+                value={senhaExclusao}
+                onChange={(e) => setSenhaExclusao(e.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+            <label className="md-checkbox">
+              <input type="checkbox" checked={entendi} onChange={(e) => setEntendi(e.target.checked)} />
+              Entendo que a exclusão é definitiva e não pode ser desfeita.
+            </label>
+            <div className="md-perigo-acoes">
+              <button type="submit" className="md-btn-perigo" disabled={excluindo}>
+                {excluindo ? "Excluindo..." : "Excluir definitivamente"}
+              </button>
+              <button
+                type="button"
+                className="md-btn-cancelar"
+                onClick={() => {
+                  setAbrirExclusao(false);
+                  setSenhaExclusao("");
+                  setEntendi(false);
+                  setErroExclusao("");
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
     </div>
   );
 }

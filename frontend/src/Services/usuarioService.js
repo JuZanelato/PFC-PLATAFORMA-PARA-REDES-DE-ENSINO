@@ -30,11 +30,18 @@ const usuarioService = {
     await api.patch(`/usuarios/${id}/inativar`);
   },
 
-    atualizarMeusDados: async (dados) => {
+  atualizarMeusDados: async (dados) => {
     const { data } = await api.put("/usuarios/me", dados);
     return data;
   },
-  
+
+  excluirMinhaConta: async (senhaAtual) => {
+    await api.post("/usuarios/me/excluir", { senhaAtual });
+  },
+
+  excluirDados: async (id) => {
+    await api.patch(`/usuarios/${id}/excluir-dados`);
+  },
 };
 
 export default usuarioService;

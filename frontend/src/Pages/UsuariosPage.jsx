@@ -5,7 +5,10 @@ import authService from "../Services/authService";
 import { mensagemDeErro } from "../Services/mensagemErro";
 import "./UsuariosPage.css";
 
+const foiAnonimizado = (usuario) => usuario.email?.endsWith("@anonimizado.local");
+
 function situacaoDe(usuario) {
+  if (foiAnonimizado(usuario)) return { texto: "Dados excluídos", classe: "usr-selo inativo" };
   if (usuario.aguardandoAprovacao) return { texto: "Aguardando aprovação", classe: "usr-selo pendente" };
   if (usuario.ativo) return { texto: "Ativo", classe: "usr-selo ativo" };
   return { texto: "Inativo", classe: "usr-selo inativo" };
@@ -75,6 +78,15 @@ export default function UsuariosPage() {
   const inativar = (u) => {
     if (!window.confirm(`Inativar ${u.nome}? Essa pessoa não conseguirá mais entrar no sistema.`)) return;
     executar(u.id, usuarioService.inativar, `${u.nome} foi inativado(a).`);
+  };
+
+  const excluirDados = (u) => {
+    const confirmou = window.confirm(
+      `Excluir os dados de ${u.nome}?\n\nNome, e-mail e senha serão apagados de forma definitiva. ` +
+        "Os empréstimos e doações continuam no histórico como \"Usuário removido\". Esta ação não pode ser desfeita."
+    );
+    if (!confirmou) return;
+    executar(u.id, usuarioService.excluirDados, `Os dados de ${u.nome} foram excluídos.`);
   };
 
   return (
@@ -168,6 +180,7 @@ export default function UsuariosPage() {
                     {usuarios.map((u) => {
                       const situacao = situacaoDe(u);
                       const podeInativar = u.ativo && !u.aguardandoAprovacao && u.id !== eu?.id;
+                      const podeExcluir = !foiAnonimizado(u) && u.id !== eu?.id;
                       return (
                         <tr key={u.id}>
                           <td>
@@ -188,6 +201,16 @@ export default function UsuariosPage() {
                                 onClick={() => inativar(u)}
                               >
                                 Inativar
+                              </button>
+                            )}
+                            {podeExcluir && (
+                              <button
+                                type="button"
+                                className="usr-btn perigo"
+                                disabled={processandoId === u.id}
+                                onClick={() => excluirDados(u)}
+                              >
+                                Excluir dados
                               </button>
                             )}
                           </td>

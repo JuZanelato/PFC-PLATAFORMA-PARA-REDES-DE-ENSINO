@@ -18,4 +18,6 @@ public interface SolicitacaoRep extends JpaRepository<Solicitacao, Long> {
             Long recursoId, Long instituicaoId, Collection<StatusSolicitacao> status);
 
     boolean existsByRecurso_IdAndStatusIn(Long recursoId, Collection<StatusSolicitacao> status);
+
+    boolean existsBySolicitante_IdAndStatusIn(Long usuarioId, Collection<StatusSolicitacao> status);
 }

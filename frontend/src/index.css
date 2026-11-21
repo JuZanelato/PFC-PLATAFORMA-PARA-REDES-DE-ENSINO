@@ -17,7 +17,7 @@
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -30,39 +30,32 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
 body {
   margin: 0;
+  background: #f8f6f9;
 }
 
+
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+}
+
+
+#root .recurso-page,
+#root .dash-page,
+#root .usr-page,
+#root .instituicao-page,
+#root .auditoria-page {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
 }
 
@@ -73,14 +66,13 @@ h2 {
   color: var(--text-h);
 }
 
+
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 0 0 1rem;
 }
 h2 {
   font-size: 24px;
@@ -108,4 +100,286 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+#root .recurso-page-acoes button,
+#root .recurso-form-acoes button,
+#root .instituicao-page-header button,
+#root .inst-secao-cabecalho button,
+#root .form-acoes button,
+#root .inst-pix-botao,
+#root .inst-pix-acoes button,
+#root .inst-pix-cancelar,
+#root .md-form button,
+#root .md-btn-perigo,
+#root .usr-btn,
+#root .sol-btn,
+#root .dash-botao,
+#root .cad-aviso button,
+#root .paginacao button {
+  padding: 0.7rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  min-height: 44px;
+}
+
+#root .rede-solicitar {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+#root .sol-abas button {
+  padding: 0.8rem 1.3rem;
+  font-size: 1rem;
+}
+
+#root .login-entrar,
+#root .cadastro-form > button[type="submit"] {
+  padding: 0.9rem;
+  font-size: 1.05rem;
+  border-radius: 8px;
+}
+
+#root .btn-copiar {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+#root .dash-boasvindas-link {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+}
+
+#root .paginacao button {
+  border: 1px solid #7a1f3d;
+  background: #ffffff;
+  color: #7a1f3d;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#root .paginacao button:hover:not(:disabled) {
+  background: #f5e6ea;
+}
+
+#root .paginacao button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+#root .recurso-acoes button,
+#root .acoes button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.95rem;
+  margin: 0.2rem 0.4rem 0.2rem 0;
+  border: 1px solid #7a1f3d;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #7a1f3d;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#root .recurso-acoes button:hover,
+#root .acoes button:hover {
+  background: #f5e6ea;
+  text-decoration: none;
+}
+
+#root .recurso-acoes button.perigo,
+#root .acoes .btn-perigo {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+#root .recurso-acoes button.perigo:hover,
+#root .acoes .btn-perigo:hover {
+  background: #fdecea;
+}
+
+#root .recurso-acoes button:disabled {
+  border-color: #d5d5dd;
+  color: #9aa0ab;
+  background: #ffffff;
+  cursor: not-allowed;
+}
+
+
+#root button.recurso-disponibilidade {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+
+#root .recurso-page,
+#root .dash-page,
+#root .usr-page,
+#root .instituicao-page,
+#root .auditoria-page,
+#root .md-page {
+  text-align: left;
+}
+
+#root .recurso-page-header h1,
+#root .instituicao-page-header h1 {
+  font-size: 1.85rem;
+}
+
+/* Tabelas */
+#root .recurso-tabela,
+#root .instituicao-tabela {
+  font-size: 1rem;
+}
+
+#root .recurso-tabela th,
+#root .recurso-tabela td,
+#root .instituicao-tabela th,
+#root .instituicao-tabela td {
+  padding: 0.9rem 0.75rem;
+}
+
+#root .sol-detalhe {
+  font-size: 0.9rem;
+}
+
+
+#root .sol-status,
+#root .recurso-status,
+#root .inst-tag {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.88rem;
+}
+
+#root .sol-atrasada,
+#root .aguardando-diretor {
+  font-size: 0.85rem;
+}
+
+
+#root .sol-linha-tempo {
+  font-size: 0.95rem;
+}
+
+
+#root .recurso-filtros input,
+#root .recurso-filtros select,
+#root .busca-instituicao,
+#root .recurso-form input,
+#root .recurso-form select,
+#root .recurso-form textarea,
+#root .instituicao-form input,
+#root .instituicao-form select,
+#root .inst-pix-form input,
+#root .inst-pix-form textarea {
+  padding: 0.8rem 0.95rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  min-height: 48px;
+  font-family: inherit;
+}
+
+#root .recurso-filtros {
+  gap: 0.9rem;
+  margin-bottom: 1.4rem;
+}
+
+#root .recurso-filtros input {
+  min-width: 280px;
+}
+
+#root .recurso-form label,
+#root .instituicao-form label,
+#root .inst-pix-form label {
+  font-size: 1rem;
+  gap: 0.4rem;
+}
+
+#root .recurso-form h2,
+#root .instituicao-form h2 {
+  font-size: 1.3rem;
+}
+
+#root .recurso-erro-campo,
+#root .erro-campo,
+#root .campo-dica {
+  font-size: 0.88rem;
+}
+
+#root .recurso-aviso,
+#root .recurso-erro-geral,
+#root .sol-sucesso,
+#root .inst-dica,
+#root .inst-sucesso,
+#root .erro-geral {
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+}
+
+#root .inst-dica {
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+
+#root .inst-secao-cabecalho h2,
+#root .inst-secao > h2 {
+  font-size: 1.4rem;
+}
+
+#root .inst-dados {
+  font-size: 1rem;
+}
+
+#root .inst-sua {
+  font-size: 0.9rem;
+}
+
+#root .rede-grade {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+#root .rede-cartao {
+  padding: 1.3rem;
+  gap: 0.7rem;
+}
+
+#root .rede-selo {
+  width: 52px;
+  height: 52px;
+}
+
+#root .rede-categoria {
+  font-size: 0.85rem;
+}
+
+#root .rede-cartao h3 {
+  font-size: 1.25rem;
+}
+
+#root .rede-escola,
+#root .rede-info {
+  font-size: 1rem;
+}
+
+#root .rede-condicao {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+
+#root .recurso-aviso {
+  margin: 0 0 1rem;
+}
+
+#root .recurso-aviso a {
+  color: #7a1f3d;
+  font-weight: 600;
 }
