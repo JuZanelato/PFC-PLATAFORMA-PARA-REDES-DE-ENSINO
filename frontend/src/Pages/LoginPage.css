@@ -270,20 +270,21 @@
   .login-painel {
     display: none;
   }
+}
 
-.login-page {
+/* Telas baixas (notebook): o cartão não encolhe, a página rola */
+#root .login-page {
   justify-content: flex-start;
 }
 
-.login-page > * {
+#root .login-page > * {
   flex-shrink: 0;
 }
 
-.login-page > :first-child {
+#root .login-page > :first-child {
   margin-top: auto;
 }
 
-.login-page > :last-child {
+#root .login-page > :last-child {
   margin-bottom: auto;
-}
 }
