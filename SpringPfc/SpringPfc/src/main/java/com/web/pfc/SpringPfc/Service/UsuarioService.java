@@ -134,17 +134,10 @@ public class UsuarioService {
         auditoriaService.registrarAnonimizacaoUsuario(emailAnonimizado, usuario.getId());
     }
 
-    @Transactional
-    public void excluirDadosDeUsuario(Long id, Usuario diretor) {
-        Usuario usuario = buscarDaMesmaInstituicao(id, diretor);
-        if (Objects.equals(usuario.getId(), diretor.getId())) {
-            throw new NegocioException("Para excluir a sua própria conta, use a tela Meus dados.");
-        }
-
-        anonimizar(usuario);
-        auditoriaService.registrarAnonimizacaoUsuario(diretor.getEmail(), usuario.getId());
-    }
-
+        /**
+     * Anonimiza o usuário: tira tudo o que identifica a pessoa, mas mantém o registro para que
+     * solicitações, histórico e doações das escolas continuem existindo. Devolve o e-mail anonimizado.
+     */
     private String anonimizar(Usuario usuario) {
         if (usuario.getEmail().endsWith(DOMINIO_ANONIMIZADO)) {
             throw new NegocioException("Os dados deste usuário já foram excluídos.");
@@ -153,7 +146,24 @@ public class UsuarioService {
             throw new NegocioException("Existem empréstimos em andamento (pendentes, aprovados ou retirados) "
                     + "feitos por este usuário. Conclua ou cancele esses empréstimos antes de excluir os dados.");
         }
+        return aplicarAnonimizacao(usuario);
+    }
 
+    
+    @Transactional
+    public int anonimizarTodosDaInstituicao(Long instituicaoId) {
+        int total = 0;
+        for (Usuario usuario : usuarioRep.findByInstituicao_IdOrderByNomeAsc(instituicaoId)) {
+            if (!usuario.getEmail().endsWith(DOMINIO_ANONIMIZADO)) {
+                aplicarAnonimizacao(usuario);
+                total++;
+            }
+        }
+        return total;
+    }
+
+
+    private String aplicarAnonimizacao(Usuario usuario) {
         String emailAntigo = usuario.getEmail();
         String emailAnonimizado = "removido-" + usuario.getId() + DOMINIO_ANONIMIZADO;
 
@@ -168,4 +178,5 @@ public class UsuarioService {
         tokenSenhaRep.deleteByUsuario_Id(usuario.getId());
         return emailAnonimizado;
     }
+
 }

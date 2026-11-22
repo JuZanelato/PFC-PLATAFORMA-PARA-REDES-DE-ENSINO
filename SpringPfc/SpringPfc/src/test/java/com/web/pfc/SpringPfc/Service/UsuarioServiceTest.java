@@ -162,6 +162,7 @@ class UsuarioServiceTest {
         verify(usuarioRep, never()).save(any());
     }
 
+    // ===================== NOVO: exclusão de dados (anonimização) =====================
 
     @Test
     void deveAnonimizarAPropriaContaQuandoASenhaEstaCorreta() {
@@ -240,5 +241,20 @@ class UsuarioServiceTest {
         assertEquals("func@escola.com", func.getEmail());
         verify(usuarioRep, never()).save(any());
         verify(logAuditoriaRep, never()).anonimizarEmail(anyString(), anyString());
+    }
+
+    @Test
+    void deveAnonimizarTodosOsUsuariosDaInstituicao() {
+        Usuario func = usuario(5L, "func@escola.com");
+        Usuario jaRemovido = usuario(8L, "removido-8@anonimizado.local");
+        when(usuarioRep.findByInstituicao_IdOrderByNomeAsc(7L)).thenReturn(List.of(func, jaRemovido));
+        when(passwordEncoder.encode(anyString())).thenReturn("HASH_ALEATORIO");
+
+        int total = usuarioService.anonimizarTodosDaInstituicao(7L);
+
+        assertEquals(1, total);
+        assertEquals("removido-5@anonimizado.local", func.getEmail());
+        verify(logAuditoriaRep).anonimizarEmail("func@escola.com", "removido-5@anonimizado.local");
+        verify(logAuditoriaRep, never()).anonimizarEmail("removido-8@anonimizado.local", "removido-8@anonimizado.local");
     }
 }

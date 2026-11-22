@@ -25,11 +25,13 @@ import com.web.pfc.SpringPfc.Repository.InstituicaoRep;
 import com.web.pfc.SpringPfc.Repository.RecursoRep;
 import com.web.pfc.SpringPfc.Repository.UsuarioRep;
 import com.web.pfc.SpringPfc.Service.AuditoriaService;
+import com.web.pfc.SpringPfc.Service.InstituicaoExclusaoService;
 import com.web.pfc.SpringPfc.domain.Instituicao;
 import com.web.pfc.SpringPfc.domain.Perfil;
 import com.web.pfc.SpringPfc.domain.StatusInst;
 import com.web.pfc.SpringPfc.domain.StatusRecurso;
 import com.web.pfc.SpringPfc.domain.Usuario;
+import com.web.pfc.SpringPfc.dto.ExcluirInstituicaoDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoDetalheDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoRedeDTO;
 import com.web.pfc.SpringPfc.dto.InstituicaoResumoDTO;
@@ -43,13 +45,16 @@ public class InstituicaoController {
         private AuditoriaService auditoriaService;
         private UsuarioRep usuarioRep;
         private RecursoRep recursoRep;
+        private InstituicaoExclusaoService instituicaoExclusaoService;
 
         public InstituicaoController(InstituicaoRep instituicaorep, AuditoriaService auditoriaService,
-                        UsuarioRep usuarioRep, RecursoRep recursoRep) {
+                        UsuarioRep usuarioRep, RecursoRep recursoRep,
+                        InstituicaoExclusaoService instituicaoExclusaoService) {
                 this.instituicaorep = instituicaorep;
                 this.auditoriaService = auditoriaService;
                 this.usuarioRep = usuarioRep;
                 this.recursoRep = recursoRep;
+                this.instituicaoExclusaoService = instituicaoExclusaoService;
         }
 
         @PostMapping
@@ -128,7 +133,7 @@ public class InstituicaoController {
                 instituicaorep.save(instituicao);
                 auditoriaService.registrarAlteracaoInstituicao(usuarioLogado, id);
 
-                // NOVO: registra na auditoria quando a chave Pix é alterada ou removida
+        
                 if (!Objects.equals(pixAnterior, instituicao.getChavePix())) {
                         if (instituicao.getChavePix() == null) {
                                 auditoriaService.registrarRemocaoPix(usuarioLogado, id);
@@ -136,6 +141,17 @@ public class InstituicaoController {
                                 auditoriaService.registrarAlteracaoPix(usuarioLogado, id);
                         }
                 }
+        }
+
+
+        
+        @PostMapping("/minha/excluir")
+        @ResponseStatus(HttpStatus.NO_CONTENT)
+        @PreAuthorize("hasRole('ADMINISTRADOR')")
+        public void excluirMinha(
+                        @RequestBody @Valid ExcluirInstituicaoDTO dto,
+                        @AuthenticationPrincipal Usuario usuarioLogado) {
+                instituicaoExclusaoService.excluirMinhaInstituicao(usuarioLogado, dto);
         }
 
 
@@ -191,7 +207,7 @@ public class InstituicaoController {
                                 .toList();
         }
 
-        // NOVO: chave Pix vazia vira null e espaços nas pontas são removidos
+        
         private String limparPix(String chavePix) {
                 return (chavePix == null || chavePix.isBlank()) ? null : chavePix.trim();
         }

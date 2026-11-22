@@ -20,4 +20,9 @@ public interface SolicitacaoRep extends JpaRepository<Solicitacao, Long> {
     boolean existsByRecurso_IdAndStatusIn(Long recursoId, Collection<StatusSolicitacao> status);
 
     boolean existsBySolicitante_IdAndStatusIn(Long usuarioId, Collection<StatusSolicitacao> status);
+
+        // NOVO: a escola tem empréstimos em andamento, como dona do recurso ou como solicitante?
+    boolean existsByInstituicaoDona_IdAndStatusIn(Long instituicaoId, Collection<StatusSolicitacao> status);
+
+    boolean existsByInstituicaoSolicitante_IdAndStatusIn(Long instituicaoId, Collection<StatusSolicitacao> status);
 }
