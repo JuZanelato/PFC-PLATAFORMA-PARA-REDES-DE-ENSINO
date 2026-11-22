@@ -270,4 +270,20 @@
   .login-painel {
     display: none;
   }
+
+.login-page {
+  justify-content: flex-start;
+}
+
+.login-page > * {
+  flex-shrink: 0;
+}
+
+.login-page > :first-child {
+  margin-top: auto;
+}
+
+.login-page > :last-child {
+  margin-bottom: auto;
+}
 }
