@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { mensagemDeErro } from "../Services/mensagemErro";
-import { hojeISO } from "../Services/solicitacaoService";
+import { hojeISO } from "../Services/SolicitacaoService";
 
 
 export default function SolicitacaoForm({ recurso, onEnviar, onCancelar }) {

@@ -1,4 +1,4 @@
-import { STATUS_SOLICITACAO } from "../Services/solicitacaoService";
+import { STATUS_SOLICITACAO } from "../Services/SolicitacaoService";
 
 export default function StatusBadge({ status }) {
     if (!status) return <span className="sol-status">—</span>;
