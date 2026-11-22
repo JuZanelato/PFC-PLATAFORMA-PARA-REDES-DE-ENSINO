@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +39,7 @@ class SenhaServiceTest {
     @Mock UsuarioRep usuarioRep;
     @Mock TokenSenhaRep tokenSenhaRep;
     @Mock PasswordEncoder passwordEncoder;
+    @Mock EmailService emailService;
     @InjectMocks SenhaService senhaService;
 
     private TokenRecSenha token(Usuario usuario, LocalDateTime expiraEm) {
@@ -46,21 +50,16 @@ class SenhaServiceTest {
         return t;
     }
 
-    
-
     @Test
     void deveGerarTokenValidoPorUmaHoraQuandoEmailCadastrado() {
-        
         Usuario usuario = new Usuario();
         usuario.setEmail("ana@escola.com");
         when(usuarioRep.findByEmail("ana@escola.com")).thenReturn(Optional.of(usuario));
         ArgumentCaptor<TokenRecSenha> captor = ArgumentCaptor.forClass(TokenRecSenha.class);
         LocalDateTime antes = LocalDateTime.now();
 
-        
         senhaService.solicitar(new SolicSenhaDTO("ana@escola.com"));
 
-        
         verify(tokenSenhaRep).save(captor.capture());
         TokenRecSenha gerado = captor.getValue();
         assertNotNull(gerado.getToken());
@@ -71,30 +70,22 @@ class SenhaServiceTest {
 
     @Test
     void naoDeveGerarTokenQuandoEmailNaoCadastrado() {
-        
         when(usuarioRep.findByEmail("nao@existe.com")).thenReturn(Optional.empty());
 
-        
         senhaService.solicitar(new SolicSenhaDTO("nao@existe.com"));
 
-        
         verify(tokenSenhaRep, never()).save(any());
     }
 
-    
-
     @Test
     void deveRedefinirSenhaEMarcarTokenComoUtilizado() {
-        
         Usuario usuario = new Usuario();
         TokenRecSenha t = token(usuario, LocalDateTime.now().plusMinutes(30));
         when(tokenSenhaRep.findByTokenAndUtilizadoFalse("abc-123")).thenReturn(Optional.of(t));
         when(passwordEncoder.encode("novaSenha1")).thenReturn("NOVO_HASH");
 
-        
         senhaService.redefinir(new RedefSenhaDTO("abc-123", "novaSenha1"));
 
-        
         assertEquals("NOVO_HASH", usuario.getSenhaHash());
         assertTrue(t.isUtilizado());
         verify(usuarioRep).save(usuario);
@@ -103,14 +94,11 @@ class SenhaServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoTokenInexistenteOuJaUtilizado() {
-        
         when(tokenSenhaRep.findByTokenAndUtilizadoFalse("invalido")).thenReturn(Optional.empty());
 
-        
         NegocioException ex = assertThrows(NegocioException.class,
                 () -> senhaService.redefinir(new RedefSenhaDTO("invalido", "novaSenha1")));
 
-        
         assertEquals("Token inválido ou expirado.", ex.getMessage());
         verify(usuarioRep, never()).save(any());
     }
@@ -118,17 +106,50 @@ class SenhaServiceTest {
     @ParameterizedTest
     @ValueSource(longs = {1, 60, 1440})
     void deveRejeitarTokenExpiradoNaFronteiraDaValidade(long minutosAposExpirar) {
-        
         Usuario usuario = new Usuario();
         TokenRecSenha t = token(usuario, LocalDateTime.now().minusMinutes(minutosAposExpirar));
         when(tokenSenhaRep.findByTokenAndUtilizadoFalse("abc-123")).thenReturn(Optional.of(t));
 
-        
         NegocioException ex = assertThrows(NegocioException.class,
                 () -> senhaService.redefinir(new RedefSenhaDTO("abc-123", "novaSenha1")));
 
-        
         assertEquals("Token inválido ou expirado.", ex.getMessage());
         verify(passwordEncoder, never()).encode(any());
+    }
+
+    @Test
+    void deveEnviarOTokenPorEmailQuandoOEnvioEstaConfigurado() {
+        Usuario usuario = new Usuario();
+        usuario.setEmail("ana@escola.com");
+        when(usuarioRep.findByEmail("ana@escola.com")).thenReturn(Optional.of(usuario));
+        when(emailService.estaConfigurado()).thenReturn(true);
+        ArgumentCaptor<TokenRecSenha> captor = ArgumentCaptor.forClass(TokenRecSenha.class);
+
+        senhaService.solicitar(new SolicSenhaDTO("ana@escola.com"));
+
+        verify(tokenSenhaRep).save(captor.capture());
+        verify(emailService).enviarRecuperacaoSenha(eq(usuario), eq(captor.getValue().getToken()));
+    }
+
+    @Test
+    void naoDeveFalharOPedidoQuandoOEnvioDoEmailDaErro() {
+        Usuario usuario = new Usuario();
+        usuario.setEmail("ana@escola.com");
+        when(usuarioRep.findByEmail("ana@escola.com")).thenReturn(Optional.of(usuario));
+        when(emailService.estaConfigurado()).thenReturn(true);
+        doThrow(new IllegalStateException("Serviço de e-mail fora do ar")).when(emailService).enviarRecuperacaoSenha(any(), anyString());
+
+        senhaService.solicitar(new SolicSenhaDTO("ana@escola.com"));
+
+        verify(tokenSenhaRep).save(any());
+    }
+
+    @Test
+    void naoDeveEnviarEmailQuandoOEmailNaoEstaCadastrado() {
+        when(usuarioRep.findByEmail("nao@existe.com")).thenReturn(Optional.empty());
+
+        senhaService.solicitar(new SolicSenhaDTO("nao@existe.com"));
+
+        verify(emailService, never()).enviarRecuperacaoSenha(any(), anyString());
     }
 }

@@ -115,6 +115,7 @@ public class UsuarioService {
         return toRespDTO(usuario);
     }
 
+
     @Transactional
     public void excluirMinhaConta(Usuario usuarioLogado, String senhaAtual) {
         Usuario usuario = usuarioRep.findById(usuarioLogado.getId())
@@ -134,10 +135,18 @@ public class UsuarioService {
         auditoriaService.registrarAnonimizacaoUsuario(emailAnonimizado, usuario.getId());
     }
 
-        /**
-     * Anonimiza o usuário: tira tudo o que identifica a pessoa, mas mantém o registro para que
-     * solicitações, histórico e doações das escolas continuem existindo. Devolve o e-mail anonimizado.
-     */
+    
+    @Transactional
+    public void excluirDadosDeUsuario(Long id, Usuario diretor) {
+        Usuario usuario = buscarDaMesmaInstituicao(id, diretor);
+        if (Objects.equals(usuario.getId(), diretor.getId())) {
+            throw new NegocioException("Para excluir a sua própria conta, use a tela Meus dados.");
+        }
+
+        anonimizar(usuario);
+        auditoriaService.registrarAnonimizacaoUsuario(diretor.getEmail(), usuario.getId());
+    }
+
     private String anonimizar(Usuario usuario) {
         if (usuario.getEmail().endsWith(DOMINIO_ANONIMIZADO)) {
             throw new NegocioException("Os dados deste usuário já foram excluídos.");
@@ -149,7 +158,6 @@ public class UsuarioService {
         return aplicarAnonimizacao(usuario);
     }
 
-    
     @Transactional
     public int anonimizarTodosDaInstituicao(Long instituicaoId) {
         int total = 0;
@@ -161,7 +169,6 @@ public class UsuarioService {
         }
         return total;
     }
-
 
     private String aplicarAnonimizacao(Usuario usuario) {
         String emailAntigo = usuario.getEmail();
@@ -178,5 +185,4 @@ public class UsuarioService {
         tokenSenhaRep.deleteByUsuario_Id(usuario.getId());
         return emailAnonimizado;
     }
-
 }

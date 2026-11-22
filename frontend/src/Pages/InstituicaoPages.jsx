@@ -97,7 +97,6 @@ function MinhaInstituicao() {
   );
 }
 
-
 function DoacoesRecebidas() {
   const [doacoes, setDoacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -255,6 +254,111 @@ function InstituicoesDaRede() {
   );
 }
 
+function ExcluirInstituicao() {
+  const [aberto, setAberto] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [nome, setNome] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [entendi, setEntendi] = useState(false);
+  const [erro, setErro] = useState("");
+  const [excluindo, setExcluindo] = useState(false);
+
+  const limpar = () => {
+    setAberto(false);
+    setSenha("");
+    setNome("");
+    setCnpj("");
+    setEntendi(false);
+    setErro("");
+  };
+
+  const handleExcluir = async (e) => {
+    e.preventDefault();
+    setErro("");
+    if (!nome.trim()) return setErro("Digite o nome da instituição.");
+    if (cnpj.replace(/\D/g, "").length !== 14) return setErro("Digite o CNPJ da instituição (14 números).");
+    if (!senha) return setErro("Informe a sua senha.");
+    if (!entendi) return setErro("Marque a confirmação de que entendeu que a exclusão é definitiva.");
+
+    setExcluindo(true);
+    try {
+      await instituicaoService.excluirMinha({
+        senhaAtual: senha,
+        nomeConfirmacao: nome,
+        cnpjConfirmacao: cnpj,
+      });
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      window.location.href = "/login";
+    } catch (err) {
+      setErro(mensagemDeErro(err, "Não foi possível excluir a instituição."));
+      setExcluindo(false);
+    }
+  };
+
+  return (
+    <section className="inst-secao inst-perigo">
+      <h2>Excluir instituição</h2>
+      <p>
+        A escola sai da rede e <strong>todos os usuários dela perdem o acesso</strong>. Os nomes, e-mails e senhas
+        de todos, inclusive o seu, são apagados de forma definitiva. Os recursos deixam de aparecer na busca. Os
+        empréstimos e doações já registrados continuam no histórico das outras escolas.
+      </p>
+      <p>
+        Não é possível excluir enquanto houver empréstimos pendentes, aprovados ou retirados, recebidos ou enviados
+        pela escola.
+      </p>
+
+      {!aberto ? (
+        <button type="button" className="inst-btn-perigo" onClick={() => setAberto(true)}>
+          Quero excluir a instituição
+        </button>
+      ) : (
+        <form className="inst-perigo-form" onSubmit={handleExcluir}>
+          {erro && <p className="erro-geral">{erro}</p>}
+          <label>
+            Digite o nome da instituição
+            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} autoComplete="off" />
+          </label>
+          <label>
+            Digite o CNPJ da instituição
+            <input
+              type="text"
+              inputMode="numeric"
+              value={cnpj}
+              onChange={(e) => setCnpj(e.target.value)}
+              maxLength={18}
+              placeholder="Somente números"
+              autoComplete="off"
+            />
+          </label>
+          <label>
+            Sua senha
+            <input
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              autoComplete="current-password"
+            />
+          </label>
+          <label className="inst-perigo-check">
+            <input type="checkbox" checked={entendi} onChange={(e) => setEntendi(e.target.checked)} />
+            Entendo que a exclusão é definitiva e não pode ser desfeita.
+          </label>
+          <div className="inst-perigo-acoes">
+            <button type="submit" className="inst-btn-perigo" disabled={excluindo}>
+              {excluindo ? "Excluindo..." : "Excluir definitivamente"}
+            </button>
+            <button type="button" className="inst-pix-cancelar" onClick={limpar} disabled={excluindo}>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
 export default function InstituicaoPages() {
   const ehDiretor = authService.usuarioLogado()?.perfil === "ADMINISTRADOR";
 
@@ -267,6 +371,7 @@ export default function InstituicaoPages() {
       {ehDiretor && <MinhaInstituicao />}
       {ehDiretor && <DoacoesRecebidas />}
       <InstituicoesDaRede />
+      {ehDiretor && <ExcluirInstituicao />}
     </div>
   );
 }

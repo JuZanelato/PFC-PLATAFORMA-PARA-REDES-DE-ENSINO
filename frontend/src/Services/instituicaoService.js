@@ -35,7 +35,7 @@ const instituicaoService = {
     await api.put(`/Instituicao/${id}`, instituicao);
   },
 
-
+  
   informarDoacao: async (id, doacao) => {
     const { data } = await api.post(`/Instituicao/${id}/doacoes`, doacao);
     return data;
@@ -44,6 +44,11 @@ const instituicaoService = {
   doacoesRecebidas: async () => {
     const { data } = await api.get("/Instituicao/minha/doacoes");
     return data;
+  },
+
+
+  excluirMinha: async (confirmacao) => {
+    await api.post("/Instituicao/minha/excluir", confirmacao);
   },
 };
 

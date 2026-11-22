@@ -5,7 +5,7 @@ export default function PoliticaPrivacidadePage() {
     <div className="politica-page">
       <header>
         <h1>Política de Privacidade</h1>
-        <p className="politica-atualizacao">Última atualização: 19 de novembro de 2026</p>
+        <p className="politica-atualizacao">Última atualização: 21 de novembro de 2026</p>
       </header>
 
       <section>
@@ -155,6 +155,12 @@ export default function PoliticaPrivacidadePage() {
           e-mail e a senha são apagados de forma definitiva, e os empréstimos, doações e registros de auditoria
           passam a aparecer como "Usuário removido", sem identificar a pessoa. A exclusão não é feita enquanto
           houver empréstimos em andamento solicitados pelo usuário.
+        </p>
+        <p>
+          O diretor também pode excluir a instituição, confirmando a senha, o nome e o CNPJ da escola. Nesse caso,
+          a escola deixa de aparecer na rede, os recursos são retirados da busca e os dados pessoais de todos os
+          usuários da instituição são anonimizados da mesma forma. A exclusão da instituição não é feita enquanto
+          houver empréstimos em andamento, recebidos ou enviados pela escola.
         </p>
       </section>
 

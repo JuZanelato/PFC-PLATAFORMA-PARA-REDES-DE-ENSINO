@@ -269,7 +269,6 @@
   font-style: italic;
 }
 
-
 .instituicao-page-acoes {
   display: flex;
   align-items: center;
@@ -385,7 +384,7 @@
   }
 }
 
-
+/* Detalhes da instituição */
 .inst-link {
   color: #7a1f3d;
   font-weight: 600;
@@ -534,7 +533,6 @@
   color: #1e6b45;
 }
 
-
 .inst-pix {
   overflow: hidden;
   text-align: left;
@@ -558,4 +556,99 @@
   .inst-pix-img {
     display: none;
   }
+}
+
+
+.inst-perigo {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #f1c9c4;
+  border-left: 4px solid #c0392b;
+  border-radius: 8px;
+  background: #fff7f6;
+  text-align: left;
+}
+
+.inst-perigo h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1.4rem;
+  color: #a5281b;
+}
+
+.inst-perigo > p {
+  margin: 0 0 0.8rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #4b5160;
+}
+
+.inst-perigo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 460px;
+  margin-top: 0.5rem;
+}
+
+.inst-perigo-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 1rem;
+  color: #3d3542;
+}
+
+.inst-perigo-form input[type="text"],
+.inst-perigo-form input[type="password"] {
+  padding: 0.8rem 0.95rem;
+  min-height: 48px;
+  border: 1px solid #cfcfd8;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.inst-perigo-form input:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+}
+
+.inst-perigo-form label.inst-perigo-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.inst-perigo-check input {
+  accent-color: #c0392b;
+}
+
+.inst-perigo-acoes {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.inst-btn-perigo {
+  padding: 0.7rem 1.4rem;
+  min-height: 44px;
+  border: 1px solid #c0392b;
+  border-radius: 8px;
+  background: #c0392b;
+  color: #ffffff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inst-btn-perigo:hover {
+  background: #a5281b;
+}
+
+.inst-btn-perigo:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
