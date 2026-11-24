@@ -16,21 +16,21 @@ Projeto Final de Curso (PFC): plataforma digital para **compartilhamento e gest�
 
 | Módulo | O que faz |
 |---|---|
-| **Usuários e acesso (BF01)** | Cadastro e login com JWT; três cargos (Diretor, Gestor e Funcionário); o Gestor aguarda aprovação do Diretor; recuperação de senha por e-mail; tela "Meus dados"; Política de Privacidade (LGPD) |
+| **Usuários e acesso (BF01)** | Cadastro e login com JWT; três cargos (Diretor, Gestor e Funcionário); o Gestor que se cadastra sozinho aguarda aprovação do Diretor; o Diretor pode cadastrar outros usuários, inclusive outro Diretor, e inativar ou reativar contas; recuperação de senha por e-mail; tela "Meus dados", onde o usuário corrige os dados e pode desativar a própria conta; Política de Privacidade (LGPD) |
 | **Instituições (BF02)** | O Diretor cadastra e edita a própria escola (com preenchimento do endereço pelo CEP); todos consultam as escolas da rede e veem os detalhes de cada uma (dados e recursos) |
 | **Recursos (BF03)** | Cadastro, edição, inativação e controle de disponibilidade dos recursos da escola |
 | **Busca e solicitação (BF04)** | Busca de recursos de outras escolas por nome, categoria e instituição; pedido com quantidade, justificativa e **data prevista de devolução** |
 | **Empréstimo e histórico (BF05)** | O Diretor aprova ou recusa; o Gestor registra a retirada e a devolução; histórico de cada pedido e destaque para devoluções **atrasadas** |
 | **Dashboard e auditoria (BF06)** | Painel com indicadores da rede; auditoria das ações dos usuários, restrita à instituição de cada Diretor |
 | **Doações via Pix** | A escola cadastra uma chave Pix; usuários de outras escolas veem a chave, copiam e informam a doação feita; o Diretor acompanha as doações recebidas |
-| **Exclusão de dados (LGPD)** | O usuário exclui a própria conta em "Meus dados" e o Diretor pode excluir os dados de um usuário da escola. Os dados pessoais são **anonimizados** e o histórico é mantido |
+| **Exclusão de dados (LGPD)** | O usuário exclui a própria conta em "Meus dados" e o Diretor pode excluir os dados de um usuário da escola. Os dados pessoais são **anonimizados** e o histórico é mantido. Para excluir ou desativar a própria conta, o Diretor precisa antes cadastrar outro Diretor, pois a escola nunca fica sem Diretor ativo |
 | **Exclusão de instituição** | O Diretor encerra a escola confirmando senha, nome e CNPJ. A escola sai da rede, os recursos são inativados e os usuários são anonimizados |
 
 ### Cargos
 
 | Cargo | Pode |
 |---|---|
-| **Diretor** | Um por escola. Cadastra e edita a escola, cadastra/aprova/recusa/inativa usuários, aprova ou recusa empréstimos, consulta a auditoria e as doações, exclui dados de usuários e a instituição |
+| **Diretor** | Um ou mais por escola. O primeiro se cadastra junto com a escola; os demais são cadastrados por um Diretor já existente. Cadastra e edita a escola, cadastra/aprova/recusa/inativa/reativa usuários, aprova ou recusa empréstimos, consulta a auditoria e as doações, exclui dados de usuários e a instituição |
 | **Gestor** | Precisa ser aprovado pelo Diretor. Cadastra recursos, acompanha as solicitações recebidas e registra retirada e devolução |
 | **Funcionário** | Busca recursos na rede, faz solicitações de empréstimo e informa doações |
 
@@ -113,6 +113,7 @@ Sem essas variáveis, o sistema funciona normalmente e mostra o código de recup
 1. Em **Criar conta**, escolha o cargo **Diretor** e clique em **Cadastrar instituição** para cadastrar a escola.
 2. Conclua o cadastro do Diretor e entre no sistema.
 3. Funcionários e Gestores se cadastram escolhendo a instituição na lista. O Gestor só entra depois que o Diretor aprovar em **Usuários**.
+4. Para ter mais de um Diretor na escola, o Diretor logado cadastra o novo Diretor em **Usuários → Cadastrar usuário**.
 
 ## Testes automatizados
 
@@ -120,13 +121,13 @@ Na pasta `SpringPfc/SpringPfc`:
 ```bash
 mvnw test
 ```
-São **86 testes** (unitários com Mockito e de integração com H2 e MockMvc). O relatório de cobertura do JaCoCo fica em `target/site/jacoco/index.html`.
+São **92 testes** (unitários com Mockito e de integração com H2 e MockMvc). O relatório de cobertura do JaCoCo fica em `target/site/jacoco/index.html`.
 
 | Classe de teste | Testes |
 |---|---|
 | SolicitacaoServiceTest | 25 |
-| AuthServiceTest | 13 |
-| UsuarioServiceTest | 13 |
+| UsuarioServiceTest | 17 |
+| AuthServiceTest | 15 |
 | SenhaServiceTest | 10 |
 | InstituicaoControllerIntegrationTest | 10 |
 | DoacaoServiceTest | 5 |
