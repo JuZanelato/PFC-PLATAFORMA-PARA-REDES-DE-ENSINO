@@ -12,6 +12,9 @@ import "./SolicitacoesPage.css";
 
 const labelDe = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label || valor;
 const FILTRO_VAZIO = { nome: "", categoria: "", instituicaoId: "" };
+const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const inicialDe = (nome) =>
+    (nome || "").trim().charAt(0).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 
 
 const POR_PAGINA = 24;
@@ -27,6 +30,7 @@ export default function BuscarRecursosPage() {
     const [selecionado, setSelecionado] = useState(null);
     const [versao, setVersao] = useState(0);
     const [limite, setLimite] = useState(POR_PAGINA);
+    const [letra, setLetra] = useState("");
 
     useEffect(() => {
         instituicaoService.listarPublicas().then(setInstituicoes).catch(() => setInstituicoes([]));
@@ -40,6 +44,7 @@ export default function BuscarRecursosPage() {
                 if (!ativo) return;
                 setRecursos(dados);
                 setLimite(POR_PAGINA);
+                setLetra("");
                 setErro("");
             })
             .catch((err) => ativo && setErro(mensagemDeErro(err, "Não foi possível buscar os recursos.")))
@@ -48,6 +53,18 @@ export default function BuscarRecursosPage() {
             ativo = false;
         };
     }, [filtroAplicado, versao]);
+
+    const contagemPorLetra = recursos.reduce((acc, r) => {
+        const l = inicialDe(r.nome);
+        acc[l] = (acc[l] || 0) + 1;
+        return acc;
+    }, {});
+    const visiveis = letra ? recursos.filter((r) => inicialDe(r.nome) === letra) : recursos;
+
+    const escolherLetra = (l) => {
+        setLetra(l);
+        setLimite(POR_PAGINA);
+    };
 
     const handleFiltro = (campo) => (e) => setFiltro((prev) => ({ ...prev, [campo]: e.target.value }));
 
@@ -135,12 +152,36 @@ export default function BuscarRecursosPage() {
             ) : (
                 
                 <>
+                <nav className="rede-letras" aria-label="Filtrar pela letra inicial">
+                    <button
+                        type="button"
+                        className={`rede-letra todas ${letra === "" ? "ativa" : ""}`}
+                        aria-pressed={letra === ""}
+                        onClick={() => escolherLetra("")}
+                    >
+                        Todas
+                    </button>
+                    {LETRAS.map((l) => (
+                        <button
+                            key={l}
+                            type="button"
+                            className={`rede-letra ${letra === l ? "ativa" : ""}`}
+                            aria-pressed={letra === l}
+                            disabled={!contagemPorLetra[l]}
+                            title={contagemPorLetra[l] ? `${contagemPorLetra[l]} recurso(s) com ${l}` : `Nenhum recurso com ${l}`}
+                            onClick={() => escolherLetra(l)}
+                        >
+                            {l}
+                        </button>
+                    ))}
+                </nav>
                 <p className="rede-total">
-                    {recursos.length === 1 ? "1 recurso encontrado" : `${recursos.length.toLocaleString("pt-BR")} recursos encontrados`}
-                    {recursos.length > limite && ` · mostrando ${limite.toLocaleString("pt-BR")}`}
+                    {visiveis.length === 1 ? "1 recurso encontrado" : `${visiveis.length.toLocaleString("pt-BR")} recursos encontrados`}
+                    {letra && ` com a letra ${letra}`}
+                    {visiveis.length > limite && ` · mostrando ${limite.toLocaleString("pt-BR")}`}
                 </p>
                 <div className="rede-grade">
-                    {recursos.slice(0, limite).map((r) => {
+                    {visiveis.slice(0, limite).map((r) => {
                         const visual = VISUAL_CATEGORIA[r.categoria] || VISUAL_CATEGORIA.OUTRO;
                         return (
                             <article key={r.id} className="rede-cartao">
@@ -180,7 +221,7 @@ export default function BuscarRecursosPage() {
                         );
                     })}
                 </div>
-                {recursos.length > limite && (
+                {visiveis.length > limite && (
                     <button type="button" className="rede-mais" onClick={() => setLimite((l) => l + POR_PAGINA)}>
                         Mostrar mais recursos
                     </button>
