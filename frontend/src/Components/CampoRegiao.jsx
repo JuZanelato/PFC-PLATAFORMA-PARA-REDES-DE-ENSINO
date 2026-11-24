@@ -39,6 +39,7 @@ export default function CampoRegiao({ valor, onChange, onEscolher, regioes, plac
       <input
         ref={campo}
         type="text"
+        className="campo-regiao-input"
         role="combobox"
         aria-expanded={aberto}
         aria-controls={listaId}
