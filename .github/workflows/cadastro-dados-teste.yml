@@ -1,0 +1,27 @@
+name: Cadastro de dados de teste
+
+on:
+  push:
+    branches: [cadastro-dados-teste]
+  workflow_dispatch:
+
+jobs:
+  cadastro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cadastrar escolas, usuários, recursos e empréstimos
+        working-directory: .github/scripts
+        env:
+          SENHA_TESTE: ${{ secrets.SENHA_TESTE }}
+          QTD_ESCOLAS: "5"
+          QTD_SOLICITACOES: "5"
+        run: node popular-dados.mjs
+      - name: Contas para a demonstração
+        if: always()
+        working-directory: .github/scripts
+        run: cat contas-de-teste.txt || true
