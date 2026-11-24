@@ -1,0 +1,83 @@
+.campo-regiao {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+
+#root .campo-regiao input {
+  width: 100%;
+  padding-right: 2.2rem;
+  margin-bottom: 0;
+}
+
+#root .campo-regiao-limpar {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #77757a;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#root .campo-regiao-limpar:hover {
+  background: #f2e8eb;
+  color: #7a1f3d;
+}
+
+.campo-regiao-lista {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.3rem 0;
+  list-style: none;
+  background: #ffffff;
+  border: 1px solid #d9d3d7;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(43, 23, 32, 0.12);
+  text-align: left;
+}
+
+.campo-regiao-lista li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.95rem;
+  color: #1f2430;
+  cursor: pointer;
+}
+
+.campo-regiao-lista li small {
+  color: #77757a;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.campo-regiao-lista li:hover,
+.campo-regiao-lista li.destaque {
+  background: #f8eef2;
+  color: #7a1f3d;
+}
+
+.campo-regiao-lista li.campo-regiao-vazio {
+  color: #77757a;
+  cursor: default;
+}
+
+.campo-regiao-lista li.campo-regiao-vazio:hover {
+  background: none;
+  color: #77757a;
+}

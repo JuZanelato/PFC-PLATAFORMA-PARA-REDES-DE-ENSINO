@@ -7,11 +7,13 @@ import { mensagemDeErro } from "../Services/mensagemErro";
 import SolicitacaoForm from "../Components/SolicitacaoForm";
 import Icone, { VISUAL_CATEGORIA } from "../Components/Icone";
 import EstadoVazio from "../Components/EstadoVazio";
+import CampoRegiao from "../Components/CampoRegiao";
+import { combinaRegiao, regioesDe } from "../Services/regiao";
 import "./RecursosPage.css";
 import "./SolicitacoesPage.css";
 
 const labelDe = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label || valor;
-const FILTRO_VAZIO = { nome: "", categoria: "", instituicaoId: "" };
+const FILTRO_VAZIO = { nome: "", categoria: "", instituicaoId: "", regiao: "" };
 const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const inicialDe = (nome) =>
     (nome || "").trim().charAt(0).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
@@ -33,7 +35,7 @@ export default function BuscarRecursosPage() {
     const [letra, setLetra] = useState("");
 
     useEffect(() => {
-        instituicaoService.listarPublicas().then(setInstituicoes).catch(() => setInstituicoes([]));
+        instituicaoService.listarRede().then(setInstituicoes).catch(() => setInstituicoes([]));
     }, []);
 
     useEffect(() => {
@@ -54,12 +56,19 @@ export default function BuscarRecursosPage() {
         };
     }, [filtroAplicado, versao]);
 
-    const contagemPorLetra = recursos.reduce((acc, r) => {
+    const regioes = regioesDe(instituicoes);
+    const enderecoPorEscola = new Map(instituicoes.map((i) => [i.id, i.endereco]));
+    const instituicoesDaRegiao = instituicoes.filter((i) => combinaRegiao(i.endereco, filtro.regiao));
+    const daRegiao = filtroAplicado.regiao
+        ? recursos.filter((r) => combinaRegiao(enderecoPorEscola.get(r.instituicaoId), filtroAplicado.regiao))
+        : recursos;
+
+    const contagemPorLetra = daRegiao.reduce((acc, r) => {
         const l = inicialDe(r.nome);
         acc[l] = (acc[l] || 0) + 1;
         return acc;
     }, {});
-    const visiveis = letra ? recursos.filter((r) => inicialDe(r.nome) === letra) : recursos;
+    const visiveis = letra ? daRegiao.filter((r) => inicialDe(r.nome) === letra) : daRegiao;
 
     const escolherLetra = (l) => {
         setLetra(l);
@@ -67,6 +76,21 @@ export default function BuscarRecursosPage() {
     };
 
     const handleFiltro = (campo) => (e) => setFiltro((prev) => ({ ...prev, [campo]: e.target.value }));
+
+    const comRegiao = (base, valor) => {
+        const escolaForaDaRegiao =
+            base.instituicaoId && !combinaRegiao(enderecoPorEscola.get(Number(base.instituicaoId)), valor);
+        return { ...base, regiao: valor, instituicaoId: escolaForaDaRegiao ? "" : base.instituicaoId };
+    };
+
+    const handleRegiao = (valor) => setFiltro((prev) => comRegiao(prev, valor));
+
+    const escolherRegiao = (valor) => {
+        const novo = comRegiao(filtro, valor);
+        setFiltro(novo);
+        setSucesso("");
+        setFiltroAplicado(novo);
+    };
 
     const handleBuscar = (e) => {
         e.preventDefault();
@@ -126,9 +150,17 @@ export default function BuscarRecursosPage() {
                         </option>
                     ))}
                 </select>
+                <CampoRegiao
+                    valor={filtro.regiao}
+                    onChange={handleRegiao}
+                    onEscolher={escolherRegiao}
+                    regioes={regioes}
+                />
                 <select value={filtro.instituicaoId} onChange={handleFiltro("instituicaoId")}>
-                    <option value="">Todas as instituições</option>
-                    {instituicoes.map((i) => (
+                    <option value="">
+                        {filtro.regiao ? "Todas as instituições da região" : "Todas as instituições"}
+                    </option>
+                    {instituicoesDaRegiao.map((i) => (
                         <option key={i.id} value={i.id}>
                             {i.nome}
                         </option>

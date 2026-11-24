@@ -6,6 +6,8 @@ import { mensagemDeErro } from "../Services/mensagemErro";
 import InstituicaoForm from "../Components/InstituicaoForm";
 import "./InstituicoesPages.css";
 import EstadoVazio from "../Components/EstadoVazio";
+import CampoRegiao from "../Components/CampoRegiao";
+import { combinaRegiao, normalizar, regioesDe } from "../Services/regiao";
 
 function MinhaInstituicao() {
   const [instituicao, setInstituicao] = useState(null);
@@ -174,6 +176,7 @@ function InstituicoesDaRede() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
+  const [regiao, setRegiao] = useState("");
   const minhaEscola = authService.usuarioLogado()?.instituicaoNome;
 
   useEffect(() => {
@@ -194,11 +197,14 @@ function InstituicoesDaRede() {
     };
   }, []);
 
+  const regioes = useMemo(() => regioesDe(instituicoes), [instituicoes]);
+
   const filtradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return instituicoes;
-    return instituicoes.filter((inst) => inst.nome?.toLowerCase().includes(termo));
-  }, [instituicoes, busca]);
+    const termo = normalizar(busca);
+    return instituicoes.filter(
+      (inst) => (!termo || normalizar(inst.nome).includes(termo)) && combinaRegiao(inst.endereco, regiao)
+    );
+  }, [instituicoes, busca, regiao]);
 
   return (
     <section className="inst-secao">
@@ -211,13 +217,21 @@ function InstituicoesDaRede() {
 
       {erro && <p className="erro-geral">{erro}</p>}
 
-      <input
-        type="text"
-        className="busca-instituicao"
-        placeholder="Buscar instituição pelo nome..."
-        value={busca}
-        onChange={(e) => setBusca(e.target.value)}
-      />
+      <div className="inst-filtros">
+        <input
+          type="text"
+          className="busca-instituicao"
+          placeholder="Buscar instituição pelo nome..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+        <CampoRegiao valor={regiao} onChange={setRegiao} regioes={regioes} />
+      </div>
+      {!carregando && (busca || regiao) && (
+        <p className="inst-total">
+          {filtradas.length === 1 ? "1 instituição encontrada" : `${filtradas.length} instituições encontradas`}
+        </p>
+      )}
 
       {carregando ? (
         <p>Carregando...</p>

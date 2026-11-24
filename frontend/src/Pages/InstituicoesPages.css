@@ -652,3 +652,27 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.inst-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.inst-filtros .busca-instituicao {
+  flex: 2;
+  min-width: 240px;
+}
+
+#root .inst-filtros .busca-instituicao {
+  margin-bottom: 0;
+}
+
+.inst-total {
+  margin: 0 0 0.8rem;
+  font-size: 0.95rem;
+  color: #52514e;
+  text-align: left;
+}
+
