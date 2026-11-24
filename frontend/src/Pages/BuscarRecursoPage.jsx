@@ -14,6 +14,8 @@ const labelDe = (opcoes, valor) => opcoes.find((o) => o.value === valor)?.label 
 const FILTRO_VAZIO = { nome: "", categoria: "", instituicaoId: "" };
 
 
+const POR_PAGINA = 24;
+
 export default function BuscarRecursosPage() {
     const [filtro, setFiltro] = useState(FILTRO_VAZIO);
     const [filtroAplicado, setFiltroAplicado] = useState(FILTRO_VAZIO);
@@ -24,6 +26,7 @@ export default function BuscarRecursosPage() {
     const [sucesso, setSucesso] = useState("");
     const [selecionado, setSelecionado] = useState(null);
     const [versao, setVersao] = useState(0);
+    const [limite, setLimite] = useState(POR_PAGINA);
 
     useEffect(() => {
         instituicaoService.listarPublicas().then(setInstituicoes).catch(() => setInstituicoes([]));
@@ -36,6 +39,7 @@ export default function BuscarRecursosPage() {
             .then((dados) => {
                 if (!ativo) return;
                 setRecursos(dados);
+                setLimite(POR_PAGINA);
                 setErro("");
             })
             .catch((err) => ativo && setErro(mensagemDeErro(err, "Não foi possível buscar os recursos.")))
@@ -130,8 +134,13 @@ export default function BuscarRecursosPage() {
                 />
             ) : (
                 
+                <>
+                <p className="rede-total">
+                    {recursos.length === 1 ? "1 recurso encontrado" : `${recursos.length.toLocaleString("pt-BR")} recursos encontrados`}
+                    {recursos.length > limite && ` · mostrando ${limite.toLocaleString("pt-BR")}`}
+                </p>
                 <div className="rede-grade">
-                    {recursos.map((r) => {
+                    {recursos.slice(0, limite).map((r) => {
                         const visual = VISUAL_CATEGORIA[r.categoria] || VISUAL_CATEGORIA.OUTRO;
                         return (
                             <article key={r.id} className="rede-cartao">
@@ -171,6 +180,12 @@ export default function BuscarRecursosPage() {
                         );
                     })}
                 </div>
+                {recursos.length > limite && (
+                    <button type="button" className="rede-mais" onClick={() => setLimite((l) => l + POR_PAGINA)}>
+                        Mostrar mais recursos
+                    </button>
+                )}
+                </>
             )}
         </div>
     );

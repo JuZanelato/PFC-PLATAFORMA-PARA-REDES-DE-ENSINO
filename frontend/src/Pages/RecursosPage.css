@@ -372,3 +372,26 @@ button.recurso-disponibilidade:disabled {
 .rede-solicitar:hover {
   background: #5c1730;
 }
+.rede-total {
+  margin: 0 0 0.9rem;
+  font-size: 0.95rem;
+  color: #52514e;
+  text-align: left;
+}
+
+#root .rede-mais {
+  display: block;
+  margin: 1.5rem auto 0;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid #a8395f;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #a8395f;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#root .rede-mais:hover {
+  background: #f8eef2;
+}
