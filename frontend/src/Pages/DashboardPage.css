@@ -350,3 +350,130 @@
     display: none;
   }
 }
+
+.dash-filtros {
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--dash-serie);
+}
+
+.dash-filtros-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.dash-filtros-topo h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+#root .dash-filtros-limpar {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--dash-serie);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dash-filtros-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.9rem;
+}
+
+.dash-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--dash-texto-2);
+}
+
+.dash-filtro select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #cfcbd1;
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--dash-texto);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.dash-filtro select:disabled {
+  background: #f4f3f5;
+  color: var(--dash-texto-3);
+}
+
+.dash-filtros-ativos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--dash-texto-2);
+}
+
+#root .dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--dash-trilho);
+  color: #7a1f3d;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#root .dash-chip:hover {
+  background: #e8d3da;
+}
+
+.dash-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.dash-filtros-status {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--dash-texto-3);
+}
+
+a.dash-indicador {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dash-indicador.clicavel {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dash-indicador.clicavel:hover,
+.dash-indicador.clicavel:focus-visible {
+  border-color: var(--dash-serie);
+  box-shadow: 0 0 0 3px var(--dash-trilho);
+}
+
+.dash-indicador-link {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--dash-serie);
+}
+

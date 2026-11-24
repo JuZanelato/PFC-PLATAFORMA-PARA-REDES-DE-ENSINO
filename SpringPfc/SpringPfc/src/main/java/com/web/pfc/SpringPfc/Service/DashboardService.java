@@ -1,5 +1,7 @@
 package com.web.pfc.SpringPfc.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import com.web.pfc.SpringPfc.domain.StatusSolicitacao;
 import com.web.pfc.SpringPfc.domain.Usuario;
 import com.web.pfc.SpringPfc.dto.DashboardRespDTO;
 import com.web.pfc.SpringPfc.dto.ItemGraficoDTO;
+import com.web.pfc.SpringPfc.exception.NegocioException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,12 +37,30 @@ public class DashboardService {
     private final InstituicaoRep instituicaoRep;
 
     public DashboardRespDTO resumo(Usuario usuario) {
+        return resumo(usuario, null, null, null, null);
+    }
+
+    public DashboardRespDTO resumo(Usuario usuario, Integer periodoDias, String escopo, String categoria,
+            String visao) {
         Long minhaInstituicaoId = usuario.getInstituicao().getId();
+        boolean soMinhaEscola = "MINHA".equalsIgnoreCase(escopo);
+        CategoriaRecurso categoriaFiltro = converterCategoria(categoria);
+        LocalDateTime desde = converterPeriodo(periodoDias);
 
         List<Recurso> recursosAtivos = recursoRep.findAll().stream()
                 .filter(r -> r.getStatus() == StatusRecurso.ATIVO)
+                .filter(r -> !soMinhaEscola || Objects.equals(r.getInstituicao().getId(), minhaInstituicaoId))
+                .filter(r -> categoriaFiltro == null || r.getCategoria() == categoriaFiltro)
                 .toList();
-        List<Solicitacao> solicitacoes = solicitacaoRep.findAll();
+
+        List<Solicitacao> solicitacoesDoPeriodo = solicitacaoRep.findAll().stream()
+                .filter(s -> desde == null || (s.getCriadaEm() != null && !s.getCriadaEm().isBefore(desde)))
+                .filter(s -> categoriaFiltro == null || s.getRecurso().getCategoria() == categoriaFiltro)
+                .toList();
+
+        List<Solicitacao> solicitacoes = solicitacoesDoPeriodo.stream()
+                .filter(s -> !soMinhaEscola || participa(s, minhaInstituicaoId, visao))
+                .toList();
 
         long disponiveis = recursosAtivos.stream()
                 .filter(r -> r.isDisponivel() && r.getQuantidade() != null && r.getQuantidade() > 0)
@@ -63,12 +84,12 @@ public class DashboardService {
                 .filter(i -> i.getStatus() != StatusInst.INATIVA)
                 .count();
 
-        long pendentesParaMim = solicitacoes.stream()
+        long pendentesParaMim = solicitacoesDoPeriodo.stream()
                 .filter(s -> s.getStatus() == StatusSolicitacao.PENDENTE)
                 .filter(s -> Objects.equals(s.getInstituicaoDona().getId(), minhaInstituicaoId))
                 .count();
 
-        long minhasEmAndamento = solicitacoes.stream()
+        long minhasEmAndamento = solicitacoesDoPeriodo.stream()
                 .filter(s -> SolicitacaoService.EM_ANDAMENTO.contains(s.getStatus()))
                 .filter(s -> Objects.equals(s.getInstituicaoSolicitante().getId(), minhaInstituicaoId))
                 .count();
@@ -108,6 +129,39 @@ public class DashboardService {
                 porCategoria,
                 porStatus,
                 emprestimosPorInstituicao);
+    }
+
+    private boolean participa(Solicitacao s, Long instituicaoId, String visao) {
+        boolean recebida = Objects.equals(s.getInstituicaoDona().getId(), instituicaoId);
+        boolean enviada = Objects.equals(s.getInstituicaoSolicitante().getId(), instituicaoId);
+        if ("RECEBIDAS".equalsIgnoreCase(visao)) {
+            return recebida;
+        }
+        if ("ENVIADAS".equalsIgnoreCase(visao)) {
+            return enviada;
+        }
+        return recebida || enviada;
+    }
+
+    private CategoriaRecurso converterCategoria(String categoria) {
+        if (categoria == null || categoria.isBlank()) {
+            return null;
+        }
+        try {
+            return CategoriaRecurso.valueOf(categoria.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new NegocioException("Categoria inválida.");
+        }
+    }
+
+    private LocalDateTime converterPeriodo(Integer periodoDias) {
+        if (periodoDias == null || periodoDias <= 0) {
+            return null;
+        }
+        if (periodoDias > 3650) {
+            throw new NegocioException("Período inválido.");
+        }
+        return LocalDate.now().minusDays(periodoDias - 1L).atStartOfDay();
     }
 
     private long contar(List<Solicitacao> solicitacoes, StatusSolicitacao status) {
