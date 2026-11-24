@@ -38,6 +38,13 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/me/desativar")
+    public ResponseEntity<Void> desativarMinhaConta(@RequestBody @Valid ExcluirContaDTO dto,
+            @AuthenticationPrincipal Usuario usuarioLogado) {
+        usuarioService.desativarMinhaConta(usuarioLogado, dto.senhaAtual());
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<List<UsuarioRespDTO>> listar(@AuthenticationPrincipal Usuario usuarioLogado) {
@@ -68,6 +75,12 @@ public class UsuarioController {
     public ResponseEntity<Void> inativar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
         usuarioService.inativar(id, usuarioLogado);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    public ResponseEntity<UsuarioRespDTO> reativar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuarioLogado) {
+        return ResponseEntity.ok(usuarioService.reativar(id, usuarioLogado));
     }
 
     @PatchMapping("/{id}/excluir-dados")

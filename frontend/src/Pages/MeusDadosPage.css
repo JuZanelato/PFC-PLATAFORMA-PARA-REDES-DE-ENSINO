@@ -187,3 +187,53 @@
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+.md-perigo.md-desativar {
+  border-color: #f0dca3;
+  border-left-color: #d9962b;
+  background: #fffaf3;
+}
+
+.md-perigo.md-desativar h2 {
+  color: #8a5a00;
+}
+
+.md-perigo.md-desativar + .md-perigo {
+  margin-top: 1.5rem;
+}
+
+#root .md-btn-desativar,
+.md-form button.md-btn-desativar {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #d9962b;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #8a5a00;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#root .md-btn-desativar:hover:not(:disabled) {
+  background: #fff3dc;
+}
+
+#root .md-btn-desativar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.md-aviso-diretor {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  background: #fff3dc;
+  color: #5c4100;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.md-aviso-diretor a {
+  color: #7a1f3d;
+  font-weight: 600;
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import authService from "../Services/authService";
 import usuarioService, { PERFIL_LABEL } from "../Services/usuarioService";
 import { mensagemDeErro } from "../Services/mensagemErro";
@@ -23,6 +24,32 @@ export default function MeusDadosPage() {
   const [erroExclusao, setErroExclusao] = useState("");
   const [excluindo, setExcluindo] = useState(false);
 
+  const [abrirDesativar, setAbrirDesativar] = useState(false);
+  const [senhaDesativar, setSenhaDesativar] = useState("");
+  const [erroDesativar, setErroDesativar] = useState("");
+  const [desativando, setDesativando] = useState(false);
+
+  const sairDoSistema = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    window.location.href = "/login";
+  };
+
+  const handleDesativar = async (e) => {
+    e.preventDefault();
+    setErroDesativar("");
+    if (!senhaDesativar) return setErroDesativar("Informe a sua senha para confirmar.");
+
+    setDesativando(true);
+    try {
+      await usuarioService.desativarMinhaConta(senhaDesativar);
+      sairDoSistema();
+    } catch (err) {
+      setErroDesativar(mensagemDeErro(err, "Não foi possível desativar a sua conta."));
+      setDesativando(false);
+    }
+  };
+
   const handleExcluir = async (e) => {
     e.preventDefault();
     setErroExclusao("");
@@ -32,9 +59,7 @@ export default function MeusDadosPage() {
     setExcluindo(true);
     try {
       await usuarioService.excluirMinhaConta(senhaExclusao);
-      localStorage.removeItem("token");
-      localStorage.removeItem("usuario");
-      window.location.href = "/login";
+      sairDoSistema();
     } catch (err) {
       setErroExclusao(mensagemDeErro(err, "Não foi possível excluir a sua conta."));
       setExcluindo(false);
@@ -146,6 +171,51 @@ export default function MeusDadosPage() {
         diretor da sua escola.
       </p>
 
+      <section className="md-perigo md-desativar">
+        <h2>Desativar minha conta</h2>
+        <p>
+          Você deixa de entrar no sistema, mas seus dados continuam guardados. Um diretor da escola pode reativar a
+          sua conta depois, na tela Usuários.
+          {usuario?.perfil === "ADMINISTRADOR" &&
+            " Como você é diretor, a escola precisa ter outro diretor ativo antes. Cadastre-o na tela Usuários."}
+        </p>
+
+        {!abrirDesativar ? (
+          <button type="button" className="md-btn-desativar" onClick={() => setAbrirDesativar(true)}>
+            Quero desativar minha conta
+          </button>
+        ) : (
+          <form className="md-form" onSubmit={handleDesativar}>
+            {erroDesativar && <p className="md-erro">{erroDesativar}</p>}
+            <label>
+              Confirme com a sua senha
+              <input
+                type="password"
+                value={senhaDesativar}
+                onChange={(e) => setSenhaDesativar(e.target.value)}
+                autoComplete="current-password"
+              />
+            </label>
+            <div className="md-perigo-acoes">
+              <button type="submit" className="md-btn-desativar" disabled={desativando}>
+                {desativando ? "Desativando..." : "Desativar conta"}
+              </button>
+              <button
+                type="button"
+                className="md-btn-cancelar"
+                onClick={() => {
+                  setAbrirDesativar(false);
+                  setSenhaDesativar("");
+                  setErroDesativar("");
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
+      </section>
+
       <section className="md-perigo">
         <h2>Excluir minha conta</h2>
         <p>
@@ -153,6 +223,12 @@ export default function MeusDadosPage() {
           empréstimos e doações já registrados continuam no histórico das escolas, mas aparecem como{" "}
           <strong>"Usuário removido"</strong>, sem identificar você.
         </p>
+        {usuario?.perfil === "ADMINISTRADOR" && (
+          <p className="md-aviso-diretor">
+            Como você é diretor, a escola não pode ficar sem diretor. Antes de excluir a sua conta,{" "}
+            <Link to="/cadastro">cadastre outro diretor</Link> (cargo "Diretor" na tela de cadastro de usuários).
+          </p>
+        )}
 
         {!abrirExclusao ? (
           <button type="button" className="md-btn-perigo" onClick={() => setAbrirExclusao(true)}>

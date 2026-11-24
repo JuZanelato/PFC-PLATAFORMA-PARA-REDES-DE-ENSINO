@@ -18,6 +18,7 @@ const CARGOS_AUTOCADASTRO = [
 const CARGOS_DIRETOR = [
   { value: "FUNCIONARIO", label: "Funcionário" },
   { value: "GESTOR", label: "Gestor (coordenador)" },
+  { value: "ADMINISTRADOR", label: "Diretor" },
 ];
 
 const VAZIO = {
@@ -237,6 +238,12 @@ export default function CadastroPage() {
           </select>
           {!diretorLogado && form.perfil === "GESTOR" && (
             <span className="cad-dica">Contas de Gestor precisam ser aprovadas pelo diretor da escola.</span>
+          )}
+          {diretorLogado && form.perfil === "ADMINISTRADOR" && (
+            <span className="cad-dica">
+              O novo diretor terá as mesmas permissões que você: aprovar empréstimos, gerenciar usuários e editar a
+              escola.
+            </span>
           )}
         </label>
 

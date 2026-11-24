@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,6 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final AuditoriaService auditoriaService;
-
 
     @Transactional
     public UsuarioRespDTO cadastrar(CadUsuarioDTO dto, Usuario responsavel) {
@@ -57,9 +57,6 @@ public class AuthService {
             if (responsavel.getPerfil() != Perfil.ADMINISTRADOR) {
                 throw new AccessDeniedException("Somente o diretor pode cadastrar usuários.");
             }
-            if (perfil == Perfil.ADMINISTRADOR) {
-                throw new NegocioException("Cada instituição possui apenas um diretor.");
-            }
             instituicao = responsavel.getInstituicao();
         }
 
@@ -76,13 +73,14 @@ public class AuthService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
         } catch (DisabledException e) {
-            
             auditoriaService.registrarTentativaLogin(dto.email(), false);
-            boolean senhaCorreta = usuarioRep.findByEmail(dto.email())
-                    .map(u -> passwordEncoder.matches(dto.senha(), u.getSenhaHash()))
-                    .orElse(false);
-            throw new CredInvalidaException(senhaCorreta
+            throw new CredInvalidaException(senhaConfere(dto)
                     ? "Seu cadastro está aguardando a aprovação do diretor da instituição."
+                    : "E-mail ou senha inválidos.");
+        } catch (LockedException e) {
+            auditoriaService.registrarTentativaLogin(dto.email(), false);
+            throw new CredInvalidaException(senhaConfere(dto)
+                    ? "Sua conta está desativada. Fale com o diretor da sua escola para reativá-la."
                     : "E-mail ou senha inválidos.");
         } catch (AuthenticationException e) {
             auditoriaService.registrarTentativaLogin(dto.email(), false);
@@ -98,10 +96,15 @@ public class AuthService {
         return new TokenRespDTO(token, "Bearer", toDTO(usuario));
     }
 
+    private boolean senhaConfere(LoginDTO dto) {
+        return usuarioRep.findByEmail(dto.email())
+                .map(u -> passwordEncoder.matches(dto.senha(), u.getSenhaHash()))
+                .orElse(false);
+    }
+
     public void logout(Usuario usuarioLogado) {
         auditoriaService.registrarLogout(usuarioLogado);
     }
-
 
     private Usuario criarUsuario(String nome, String email, String senha, Perfil perfil,
             Instituicao instituicao, boolean aguardandoAprovacao) {

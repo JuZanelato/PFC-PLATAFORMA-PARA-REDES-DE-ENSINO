@@ -21,6 +21,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -230,6 +231,42 @@ class AuthServiceTest {
         assertEquals(1L, captor.getValue().getInstituicao().getId());
         assertFalse(captor.getValue().isAguardandoAprovacao());
         verify(instituicaoRep, never()).findById(any());
+    }
+
+    @Test
+    void deveCadastrarOutroDiretorQuandoODiretorLogadoCadastra() {
+        when(usuarioRep.existsByEmail("vice@escola.com")).thenReturn(false);
+        when(passwordEncoder.encode("senha123")).thenReturn("HASH_BCRYPT");
+        when(usuarioRep.save(any(Usuario.class))).thenAnswer(i -> i.getArgument(0));
+        Usuario diretor = new Usuario();
+        diretor.setEmail("diretor@escola.com");
+        diretor.setPerfil(Perfil.ADMINISTRADOR);
+        diretor.setInstituicao(instituicao());
+        CadUsuarioDTO dto = new CadUsuarioDTO("Vice", "vice@escola.com", "senha123", null, "ADMINISTRADOR");
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+
+        authService.cadastrar(dto, diretor);
+
+        verify(usuarioRep).save(captor.capture());
+        assertEquals(Perfil.ADMINISTRADOR, captor.getValue().getPerfil());
+        assertEquals(1L, captor.getValue().getInstituicao().getId());
+        assertTrue(captor.getValue().isEnabled());
+    }
+
+    @Test
+    void deveAvisarQueAContaEstaDesativadaQuandoSenhaCorreta() {
+        Usuario desativado = new Usuario();
+        desativado.setSenhaHash("HASH");
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new LockedException("inativo"));
+        when(usuarioRep.findByEmail("ana@escola.com")).thenReturn(Optional.of(desativado));
+        when(passwordEncoder.matches("senha123", "HASH")).thenReturn(true);
+
+        CredInvalidaException ex = assertThrows(CredInvalidaException.class,
+                () -> authService.login(new LoginDTO("ana@escola.com", "senha123")));
+
+        assertEquals("Sua conta está desativada. Fale com o diretor da sua escola para reativá-la.", ex.getMessage());
+        verify(jwtUtil, never()).gerarToken(any());
     }
 
     @Test

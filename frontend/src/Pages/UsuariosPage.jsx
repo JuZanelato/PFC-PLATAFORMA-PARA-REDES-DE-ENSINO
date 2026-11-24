@@ -80,6 +80,11 @@ export default function UsuariosPage() {
     executar(u.id, usuarioService.inativar, `${u.nome} foi inativado(a).`);
   };
 
+  const reativar = (u) => {
+    if (!window.confirm(`Reativar ${u.nome}? Essa pessoa voltará a entrar no sistema.`)) return;
+    executar(u.id, usuarioService.reativar, `${u.nome} foi reativado(a).`);
+  };
+
   const excluirDados = (u) => {
     const confirmou = window.confirm(
       `Excluir os dados de ${u.nome}?\n\nNome, e-mail e senha serão apagados de forma definitiva. ` +
@@ -181,6 +186,7 @@ export default function UsuariosPage() {
                       const situacao = situacaoDe(u);
                       const podeInativar = u.ativo && !u.aguardandoAprovacao && u.id !== eu?.id;
                       const podeExcluir = !foiAnonimizado(u) && u.id !== eu?.id;
+                      const podeReativar = !u.ativo && !u.aguardandoAprovacao && !foiAnonimizado(u);
                       return (
                         <tr key={u.id}>
                           <td>
@@ -201,6 +207,16 @@ export default function UsuariosPage() {
                                 onClick={() => inativar(u)}
                               >
                                 Inativar
+                              </button>
+                            )}
+                            {podeReativar && (
+                              <button
+                                type="button"
+                                className="usr-btn"
+                                disabled={processandoId === u.id}
+                                onClick={() => reativar(u)}
+                              >
+                                Reativar
                               </button>
                             )}
                             {podeExcluir && (

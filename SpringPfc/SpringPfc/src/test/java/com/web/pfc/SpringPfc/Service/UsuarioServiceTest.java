@@ -257,4 +257,71 @@ class UsuarioServiceTest {
         verify(logAuditoriaRep).anonimizarEmail("func@escola.com", "removido-5@anonimizado.local");
         verify(logAuditoriaRep, never()).anonimizarEmail("removido-8@anonimizado.local", "removido-8@anonimizado.local");
     }
+
+    private Usuario diretor(Long id, String email) {
+        Usuario d = usuario(id, email);
+        d.setPerfil(Perfil.ADMINISTRADOR);
+        d.setSenhaHash("HASH");
+        d.getInstituicao().setId(7L);
+        return d;
+    }
+
+    @Test
+    void diretorPodeDesativarAPropriaContaQuandoHaOutroDiretorAtivo() {
+        Usuario diretor = diretor(1L, "diretor@escola.com");
+        when(usuarioRep.findById(1L)).thenReturn(Optional.of(diretor));
+        when(passwordEncoder.matches("senha123", "HASH")).thenReturn(true);
+        when(usuarioRep.countByInstituicao_IdAndPerfilAndAtivoTrue(7L, Perfil.ADMINISTRADOR)).thenReturn(2L);
+
+        usuarioService.desativarMinhaConta(diretor, "senha123");
+
+        assertFalse(diretor.isAtivo());
+        assertEquals("diretor@escola.com", diretor.getEmail());
+        verify(usuarioRep).save(diretor);
+        verify(auditoriaService).registrarInativacaoUsuario(diretor, 1L);
+    }
+
+    @Test
+    void unicoDiretorAtivoNaoPodeDesativarAPropriaConta() {
+        Usuario diretor = diretor(1L, "diretor@escola.com");
+        when(usuarioRep.findById(1L)).thenReturn(Optional.of(diretor));
+        when(passwordEncoder.matches("senha123", "HASH")).thenReturn(true);
+        when(usuarioRep.countByInstituicao_IdAndPerfilAndAtivoTrue(7L, Perfil.ADMINISTRADOR)).thenReturn(1L);
+
+        NegocioException ex = assertThrows(NegocioException.class,
+                () -> usuarioService.desativarMinhaConta(diretor, "senha123"));
+
+        assertTrue(ex.getMessage().startsWith("Você é o único diretor ativo desta escola."));
+        assertTrue(diretor.isAtivo());
+        verify(usuarioRep, never()).save(any());
+    }
+
+    @Test
+    void diretorDeveReativarUmUsuarioInativoDaEscola() {
+        Usuario diretor = diretor(1L, "diretor@escola.com");
+        Usuario ana = usuario(5L, "ana@escola.com");
+        ana.getInstituicao().setId(7L);
+        ana.setAtivo(false);
+        when(usuarioRep.findById(5L)).thenReturn(Optional.of(ana));
+
+        usuarioService.reativar(5L, diretor);
+
+        assertTrue(ana.isAtivo());
+        verify(usuarioRep).save(ana);
+        verify(auditoriaService).registrarReativacaoUsuario(diretor, 5L);
+    }
+
+    @Test
+    void naoDeveReativarUsuarioComDadosExcluidos() {
+        Usuario diretor = diretor(1L, "diretor@escola.com");
+        Usuario removido = usuario(5L, "removido-5@anonimizado.local");
+        removido.getInstituicao().setId(7L);
+        removido.setAtivo(false);
+        when(usuarioRep.findById(5L)).thenReturn(Optional.of(removido));
+
+        assertThrows(NegocioException.class, () -> usuarioService.reativar(5L, diretor));
+
+        assertFalse(removido.isAtivo());
+        verify(usuarioRep, never()).save(any());
+    }
 }

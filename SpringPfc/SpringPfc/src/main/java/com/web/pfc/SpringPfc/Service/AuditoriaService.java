@@ -75,7 +75,10 @@ public class AuditoriaService {
         salvar(responsavel.getEmail(), "USUARIO_INATIVADO:" + usuarioId);
     }
 
-    
+    public void registrarReativacaoUsuario(Usuario diretor, Long usuarioId) {
+        salvar(diretor.getEmail(), "USUARIO_REATIVADO:" + usuarioId);
+    }
+
     public void registrarAnonimizacaoUsuario(String emailResponsavel, Long usuarioId) {
         salvar(emailResponsavel, "USUARIO_ANONIMIZADO:" + usuarioId);
     }

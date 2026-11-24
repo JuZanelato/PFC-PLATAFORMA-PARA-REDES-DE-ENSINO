@@ -38,7 +38,7 @@ public class UsuarioService {
         return new UsuarioRespDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getPerfil().name(),
                 usuario.getInstituicao().getNome(), usuario.isAtivo(), usuario.isAguardandoAprovacao());
     }
-
+    
     public List<UsuarioRespDTO> listarDaInstituicao(Usuario diretor) {
         return usuarioRep.findByInstituicao_IdOrderByNomeAsc(diretor.getInstituicao().getId())
                 .stream().map(this::toRespDTO).toList();
@@ -52,13 +52,57 @@ public class UsuarioService {
     public void inativar(Long id, Usuario responsavel) {
         Usuario usuario = buscarDaMesmaInstituicao(id, responsavel);
         if (Objects.equals(usuario.getId(), responsavel.getId())) {
-            throw new NegocioException("Você não pode inativar a própria conta.");
+            throw new NegocioException("Para desativar a sua própria conta, use a tela Meus dados.");
+        }
+        if (!usuario.isAtivo()) {
+            throw new NegocioException("Este usuário já está inativo.");
         }
         usuario.setAtivo(false);
         usuarioRep.save(usuario);
         auditoriaService.registrarInativacaoUsuario(responsavel, id);
     }
 
+    @Transactional
+    public UsuarioRespDTO reativar(Long id, Usuario diretor) {
+        Usuario usuario = buscarDaMesmaInstituicao(id, diretor);
+        if (usuario.getEmail().endsWith(DOMINIO_ANONIMIZADO)) {
+            throw new NegocioException("Os dados deste usuário foram excluídos e a conta não pode ser reativada.");
+        }
+        if (usuario.isAguardandoAprovacao()) {
+            throw new NegocioException("Este cadastro está aguardando aprovação. Use o botão Aprovar.");
+        }
+        if (usuario.isAtivo()) {
+            throw new NegocioException("Este usuário já está ativo.");
+        }
+        usuario.setAtivo(true);
+        usuarioRep.save(usuario);
+        auditoriaService.registrarReativacaoUsuario(diretor, id);
+        return toRespDTO(usuario);
+    }
+
+    @Transactional
+    public void desativarMinhaConta(Usuario usuarioLogado, String senhaAtual) {
+        Usuario usuario = usuarioRep.findById(usuarioLogado.getId())
+                .orElseThrow(() -> new NegocioException("Usuário não encontrado."));
+
+        if (senhaAtual == null || !passwordEncoder.matches(senhaAtual, usuario.getSenhaHash())) {
+            throw new NegocioException("A senha atual está incorreta.");
+        }
+        exigirOutroDiretorAtivo(usuario, "desativar");
+
+        usuario.setAtivo(false);
+        usuarioRep.save(usuario);
+        auditoriaService.registrarInativacaoUsuario(usuario, usuario.getId());
+    }
+
+    private void exigirOutroDiretorAtivo(Usuario usuario, String acao) {
+        if (usuario.getPerfil() == Perfil.ADMINISTRADOR
+                && usuarioRep.countByInstituicao_IdAndPerfilAndAtivoTrue(
+                        usuario.getInstituicao().getId(), Perfil.ADMINISTRADOR) <= 1) {
+            throw new NegocioException("Você é o único diretor ativo desta escola. Para " + acao
+                    + " a sua conta, cadastre antes outro diretor na tela Usuários.");
+        }
+    }
     private Usuario buscarDaMesmaInstituicao(Long id, Usuario diretor) {
         Usuario usuario = usuarioRep.findById(id)
                 .orElseThrow(() -> new NegocioException("Usuário não encontrado."));
@@ -115,7 +159,6 @@ public class UsuarioService {
         return toRespDTO(usuario);
     }
 
-
     @Transactional
     public void excluirMinhaConta(Usuario usuarioLogado, String senhaAtual) {
         Usuario usuario = usuarioRep.findById(usuarioLogado.getId())
@@ -124,12 +167,7 @@ public class UsuarioService {
         if (senhaAtual == null || !passwordEncoder.matches(senhaAtual, usuario.getSenhaHash())) {
             throw new NegocioException("A senha atual está incorreta.");
         }
-        if (usuario.getPerfil() == Perfil.ADMINISTRADOR
-                && usuarioRep.countByInstituicao_IdAndPerfilAndAtivoTrue(
-                        usuario.getInstituicao().getId(), Perfil.ADMINISTRADOR) <= 1) {
-            throw new NegocioException("Você é o único diretor desta escola. Para excluir a sua conta, "
-                    + "a escola precisa antes de outro diretor responsável.");
-        }
+        exigirOutroDiretorAtivo(usuario, "excluir");
 
         String emailAnonimizado = anonimizar(usuario);
         auditoriaService.registrarAnonimizacaoUsuario(emailAnonimizado, usuario.getId());
