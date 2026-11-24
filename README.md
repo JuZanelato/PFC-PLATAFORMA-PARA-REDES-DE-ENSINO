@@ -121,13 +121,13 @@ Na pasta `SpringPfc/SpringPfc`:
 ```bash
 mvnw test
 ```
-São **92 testes** (unitários com Mockito e de integração com H2 e MockMvc). O relatório de cobertura do JaCoCo fica em `target/site/jacoco/index.html`.
+São **95 testes** (unitários com Mockito e de integração com H2 e MockMvc). O relatório de cobertura do JaCoCo fica em `target/site/jacoco/index.html`.
 
 | Classe de teste | Testes |
 |---|---|
 | SolicitacaoServiceTest | 25 |
 | UsuarioServiceTest | 17 |
-| AuthServiceTest | 15 |
+| AuthServiceTest | 17 |
 | SenhaServiceTest | 10 |
 | InstituicaoControllerIntegrationTest | 10 |
 | DoacaoServiceTest | 5 |
@@ -135,6 +135,7 @@ São **92 testes** (unitários com Mockito e de integração com H2 e MockMvc). 
 | EmailServiceTest | 3 |
 | InstituicaoRepIntegrationTest | 1 |
 | LogAuditoriaRepIntegrationTest | 1 |
+| UsuarioRepIntegrationTest | 1 |
 
 ## Publicação (Render)
 

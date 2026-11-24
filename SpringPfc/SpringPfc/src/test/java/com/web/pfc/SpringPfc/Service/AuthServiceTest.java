@@ -270,6 +270,34 @@ class AuthServiceTest {
     }
 
     @Test
+    void deveGuardarOEmailEmMinusculasNoCadastro() {
+        prepararCadastroValido();
+        CadUsuarioDTO dto = new CadUsuarioDTO("Ana", "  Ana@Escola.COM ", "senha123", 1L, "FUNCIONARIO");
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+
+        authService.cadastrar(dto, null);
+
+        verify(usuarioRep).existsByEmail("ana@escola.com");
+        verify(usuarioRep).save(captor.capture());
+        assertEquals("ana@escola.com", captor.getValue().getEmail());
+    }
+
+    @Test
+    void deveEntrarComOEmailEmMaiusculas() {
+        Usuario usuario = new Usuario();
+        usuario.setEmail("ana@escola.com");
+        usuario.setPerfil(Perfil.FUNCIONARIO);
+        usuario.setInstituicao(instituicao());
+        when(usuarioRep.findByEmail("ana@escola.com")).thenReturn(Optional.of(usuario));
+        when(jwtUtil.gerarToken(usuario)).thenReturn("TOKEN");
+
+        TokenRespDTO resp = authService.login(new LoginDTO("ANA@Escola.com", "senha123"));
+
+        assertEquals("TOKEN", resp.token());
+        verify(authenticationManager).authenticate(new UsernamePasswordAuthenticationToken("ana@escola.com", "senha123"));
+    }
+
+    @Test
     void deveAvisarQueCadastroEstaPendenteQuandoSenhaCorreta() {
         Usuario pendente = new Usuario();
         pendente.setSenhaHash("HASH");

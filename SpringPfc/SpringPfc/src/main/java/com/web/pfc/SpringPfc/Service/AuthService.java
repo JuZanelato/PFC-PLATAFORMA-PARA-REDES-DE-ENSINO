@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,8 @@ public class AuthService {
 
     @Transactional
     public UsuarioRespDTO cadastrar(CadUsuarioDTO dto, Usuario responsavel) {
-        validarEmailLivre(dto.email());
+        String email = normalizarEmail(dto.email());
+        validarEmailLivre(email);
         Perfil perfil = converterPerfil(dto.perfil());
 
         Instituicao instituicao;
@@ -60,7 +62,7 @@ public class AuthService {
             instituicao = responsavel.getInstituicao();
         }
 
-        Usuario salvo = criarUsuario(dto.nome(), dto.email(), dto.senha(), perfil, instituicao, aguardandoAprovacao);
+        Usuario salvo = criarUsuario(dto.nome(), email, dto.senha(), perfil, instituicao, aguardandoAprovacao);
 
         String emailResponsavel = (responsavel != null) ? responsavel.getEmail() : salvo.getEmail() + " (autocadastro)";
         auditoriaService.registrarCriacaoUsuario(emailResponsavel, salvo.getEmail());
@@ -69,25 +71,26 @@ public class AuthService {
     }
 
     public TokenRespDTO login(LoginDTO dto) {
+        String email = normalizarEmail(dto.email());
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
+                    new UsernamePasswordAuthenticationToken(email, dto.senha()));
         } catch (DisabledException e) {
-            auditoriaService.registrarTentativaLogin(dto.email(), false);
-            throw new CredInvalidaException(senhaConfere(dto)
+            auditoriaService.registrarTentativaLogin(email, false);
+            throw new CredInvalidaException(senhaConfere(email, dto.senha())
                     ? "Seu cadastro está aguardando a aprovação do diretor da instituição."
                     : "E-mail ou senha inválidos.");
         } catch (LockedException e) {
-            auditoriaService.registrarTentativaLogin(dto.email(), false);
-            throw new CredInvalidaException(senhaConfere(dto)
+            auditoriaService.registrarTentativaLogin(email, false);
+            throw new CredInvalidaException(senhaConfere(email, dto.senha())
                     ? "Sua conta está desativada. Fale com o diretor da sua escola para reativá-la."
                     : "E-mail ou senha inválidos.");
         } catch (AuthenticationException e) {
-            auditoriaService.registrarTentativaLogin(dto.email(), false);
+            auditoriaService.registrarTentativaLogin(email, false);
             throw new CredInvalidaException("E-mail ou senha inválidos.");
         }
 
-        Usuario usuario = usuarioRep.findByEmail(dto.email())
+        Usuario usuario = usuarioRep.findByEmail(email)
                 .orElseThrow(() -> new CredInvalidaException("E-mail ou senha inválidos."));
 
         String token = jwtUtil.gerarToken(usuario);
@@ -96,10 +99,14 @@ public class AuthService {
         return new TokenRespDTO(token, "Bearer", toDTO(usuario));
     }
 
-    private boolean senhaConfere(LoginDTO dto) {
-        return usuarioRep.findByEmail(dto.email())
-                .map(u -> passwordEncoder.matches(dto.senha(), u.getSenhaHash()))
+    private boolean senhaConfere(String email, String senha) {
+        return usuarioRep.findByEmail(email)
+                .map(u -> passwordEncoder.matches(senha, u.getSenhaHash()))
                 .orElse(false);
+    }
+
+    private static String normalizarEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
     }
 
     public void logout(Usuario usuarioLogado) {
