@@ -18,8 +18,8 @@ jobs:
         working-directory: .github/scripts
         env:
           SENHA_TESTE: ${{ secrets.SENHA_TESTE }}
-          QTD_ESCOLAS: "5"
-          QTD_SOLICITACOES: "5"
+          QTD_ESCOLAS: "500"
+          QTD_SOLICITACOES: "300"
         run: node popular-dados.mjs
       - name: Contas para a demonstração
         if: always()
